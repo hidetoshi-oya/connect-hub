@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # MySQL データベースサービス
+  mysql:
+    image: mysql:8.0
+    container_name: connect-hub-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: connecthub
+      MYSQL_USER: connecthub_user
+      MYSQL_PASSWORD: connecthub_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - connect-hub-network
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  
+  # バックエンドサービス
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: connect-hub-backend
+    restart: always
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: connecthub_user
+      DB_PASSWORD: connecthub_password
+      DB_NAME: connecthub
+      JWT_SECRET: your_jwt_secret_key
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - mysql
+    networks:
+      - connect-hub-network
+  
+  # フロントエンドサービス
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: connect-hub-frontend
+    restart: always
+    environment:
+      NODE_ENV: development
+      REACT_APP_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - connect-hub-network
+
+volumes:
+  mysql_data:
+
+networks:
+  connect-hub-network:
+    driver: bridge
