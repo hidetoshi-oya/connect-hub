@@ -1,0 +1,220 @@
+/* PostCard.module.css */
+.postCard {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.postCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pinnedPost {
+  border-left: 4px solid #f39c12;
+  background-color: #fffcf5;
+}
+
+.pinnedBadge {
+  display: inline-block;
+  background-color: #f39c12;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.postHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.authorInfo {
+  display: flex;
+  align-items: center;
+}
+
+.authorAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  border: 2px solid #e1e1e1;
+}
+
+.authorName {
+  font-weight: 500;
+  color: #34495e;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.authorName:hover {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.authorDepartment {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+.postMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.postDate {
+  font-size: 12px;
+  color: #95a5a6;
+}
+
+.postTitle {
+  text-decoration: none;
+  color: inherit;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.postTitle h3 {
+  font-size: 18px;
+  margin: 0;
+  color: #2c3e50;
+  transition: color 0.2s;
+}
+
+.postTitle:hover h3 {
+  color: #3498db;
+}
+
+.postContent {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  word-break: break-word;
+}
+
+.categoryTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.categoryTag {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #7f8c8d;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.categoryTag:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.postActions {
+  display: flex;
+  border-top: 1px solid #ecf0f1;
+  padding-top: 15px;
+  margin-top: 10px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-size: 14px;
+  margin-right: 20px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background-color: #f5f7fa;
+}
+
+.actionButton.active {
+  color: #3498db;
+}
+
+.actionButton.liked {
+  color: #e74c3c;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+.count {
+  background-color: #f5f7fa;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.commentsSection {
+  margin-top: 15px;
+  border-top: 1px dashed #ecf0f1;
+  padding-top: 15px;
+}
+
+.commentsList {
+  margin-bottom: 15px;
+}
+
+.noComments {
+  font-size: 14px;
+  color: #95a5a6;
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 14px;
+  margin: 10px 0;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 576px) {
+  .postCard {
+    padding: 15px;
+  }
+  
+  .authorAvatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .postActions {
+    flex-wrap: wrap;
+  }
+  
+  .actionButton {
+    margin-right: 10px;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+}
