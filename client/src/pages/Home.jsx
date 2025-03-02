@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import PostCard from '../components/posts/PostCard';
 import styles from './Home.module.css';
@@ -11,8 +11,9 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // URLクエリパラメータを取得
+  // URLからクエリパラメータを取得
   const getQueryParams = () => {
     const searchParams = new URLSearchParams(location.search);
     return {
@@ -22,40 +23,25 @@ const Home = () => {
     };
   };
 
-  // APIクエリパラメータを構築
-  const buildApiQuery = (params) => {
-    const queryParams = new URLSearchParams();
-    
-    if (params.category) {
-      queryParams.append('category', params.category);
-    }
-    
-    if (params.search) {
-      queryParams.append('search', params.search);
-    }
-    
-    if (params.pinned) {
-      queryParams.append('pinned', 'true');
-    }
-    
-    const queryString = queryParams.toString();
-    return queryString ? `?${queryString}` : '';
-  };
-
-  // 投稿を取得
+  // 投稿一覧を取得
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const params = getQueryParams();
-        const queryString = buildApiQuery(params);
         
-        const token = localStorage.getItem('token');
-        const config = token ? {
-          headers: { Authorization: `Bearer ${token}` }
-        } : {};
+        // クエリパラメータを取得
+        const { category, search, pinned } = getQueryParams();
         
-        const response = await axios.get(`${API_URL}/posts${queryString}`, config);
+        // API用クエリパラメータを構築
+        let queryParams = [];
+        if (category) queryParams.push(`category=${encodeURIComponent(category)}`);
+        if (search) queryParams.push(`search=${encodeURIComponent(search)}`);
+        if (pinned) queryParams.push('pinned=true');
+        
+        const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+        
+        // 投稿一覧を取得
+        const response = await axios.get(`${API_URL}/posts${queryString}`);
         setPosts(response.data);
         setLoading(false);
       } catch (err) {
@@ -68,7 +54,22 @@ const Home = () => {
     fetchPosts();
   }, [location.search]);
 
-  // 投稿の更新
+  // ページタイトルを生成
+  const getPageTitle = () => {
+    const { category, search, pinned } = getQueryParams();
+    
+    if (search) {
+      return `「${search}」の検索結果`;
+    } else if (pinned) {
+      return 'ピン留め投稿';
+    } else if (category) {
+      return `${category}の投稿`;
+    } else {
+      return '最新の投稿';
+    }
+  };
+
+  // 投稿の更新処理
   const handlePostUpdate = (postId, updates) => {
     setPosts(prevPosts => 
       prevPosts.map(post => 
@@ -77,49 +78,47 @@ const Home = () => {
     );
   };
 
-  // 現在のフィルタに基づくタイトルを生成
-  const getPageTitle = () => {
-    const params = getQueryParams();
-    
-    if (params.pinned) {
-      return 'ピン留め投稿';
-    }
-    
-    if (params.category) {
-      return `${params.category}の投稿`;
-    }
-    
-    if (params.search) {
-      return `"${params.search}"の検索結果`;
-    }
-    
-    return '最新の投稿';
-  };
-
   return (
     <div className={styles.homePage}>
-      <h1 className={styles.pageTitle}>{getPageTitle()}</h1>
-      
-      {loading ? (
-        <div className={styles.loading}>投稿を読み込み中...</div>
-      ) : error ? (
-        <div className={styles.error}>{error}</div>
-      ) : posts.length === 0 ? (
-        <div className={styles.noPosts}>
-          <p>投稿が見つかりませんでした。</p>
-          <p>条件を変更するか、新しい投稿を作成してください。</p>
-        </div>
-      ) : (
-        <div className={styles.postsList}>
-          {posts.map(post => (
+      <div className={styles.pageHeader}>
+        <h1 className={styles.pageTitle}>{getPageTitle()}</h1>
+        {getQueryParams().category && (
+          <button 
+            className={styles.clearFilterButton}
+            onClick={() => navigate('/')}
+          >
+            フィルタをクリア
+          </button>
+        )}
+      </div>
+
+      <div className={styles.postsContainer}>
+        {loading ? (
+          <div className={styles.loading}>投稿を読み込んでいます...</div>
+        ) : error ? (
+          <div className={styles.error}>{error}</div>
+        ) : posts.length === 0 ? (
+          <div className={styles.noPosts}>
+            <p>投稿が見つかりませんでした</p>
+            {getQueryParams().category && (
+              <button 
+                className={styles.clearFilterButton}
+                onClick={() => navigate('/')}
+              >
+                フィルタをクリアして全ての投稿を表示
+              </button>
+            )}
+          </div>
+        ) : (
+          posts.map(post => (
             <PostCard 
               key={post.id} 
               post={post} 
               onUpdate={handlePostUpdate}
             />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };
