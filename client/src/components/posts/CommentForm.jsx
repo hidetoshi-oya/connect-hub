@@ -10,7 +10,7 @@ const CommentForm = ({ postId, onCommentAdded }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -27,9 +27,13 @@ const CommentForm = ({ postId, onCommentAdded }) => {
         headers: { Authorization: `Bearer ${token}` }
       };
       
-      const response = await axios.post(`${API_URL}/comments/post/${postId}`, { content }, config);
+      const response = await axios.post(
+        `${API_URL}/comments/post/${postId}`, 
+        { content },
+        config
+      );
       
-      // 成功したらフォームをリセット
+      // 入力フィールドをクリア
       setContent('');
       setLoading(false);
       
@@ -38,38 +42,37 @@ const CommentForm = ({ postId, onCommentAdded }) => {
         onCommentAdded(response.data);
       }
     } catch (err) {
-      console.error('コメントの投稿に失敗:', err);
-      setError(err.response?.data?.message || 'コメントの投稿に失敗しました');
+      console.error('コメント投稿に失敗:', err);
+      setError('コメントの投稿に失敗しました');
       setLoading(false);
     }
   };
-
+  
   return (
     <form className={styles.commentForm} onSubmit={handleSubmit}>
-      <div className={styles.formGroup}>
+      <div className={styles.formContent}>
         <img 
           src={currentUser?.avatar_url || '/default-avatar.png'} 
-          alt={currentUser?.name}
+          alt={currentUser?.name || 'ユーザー'} 
           className={styles.userAvatar} 
         />
         <input
           type="text"
+          placeholder="コメントを投稿..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="コメントを入力..."
           className={styles.commentInput}
           disabled={loading}
         />
         <button 
           type="submit" 
           className={styles.submitButton}
-          disabled={!content.trim() || loading}
+          disabled={loading || !content.trim()}
         >
-          {loading ? '送信中...' : '送信'}
+          {loading ? '送信中...' : '投稿'}
         </button>
       </div>
-      
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <div className={styles.error}>{error}</div>}
     </form>
   );
 };
