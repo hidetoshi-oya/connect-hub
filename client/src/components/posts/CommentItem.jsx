@@ -30,7 +30,6 @@ const CommentItem = ({ comment, postId, onDeleted }) => {
 
       await axios.delete(`${API_URL}/comments/${comment.id}`, config);
       
-      // 削除成功を親コンポーネントに通知
       if (onDeleted) {
         onDeleted(comment.id);
       }
@@ -43,12 +42,8 @@ const CommentItem = ({ comment, postId, onDeleted }) => {
     }
   };
 
-  // 現在のユーザーがこのコメントの投稿者か管理者かどうかを確認
-  const canDelete = currentUser && (
-    currentUser.id === comment.author.id || 
-    currentUser.role === 'admin' || 
-    currentUser.role === 'moderator'
-  );
+  // 現在のユーザーがコメントの作成者かどうか
+  const isCommentAuthor = currentUser && comment.author.id === currentUser.id;
 
   return (
     <div className={styles.commentItem}>
@@ -56,7 +51,7 @@ const CommentItem = ({ comment, postId, onDeleted }) => {
         <div className={styles.commentAuthor}>
           <img 
             src={comment.author.avatar_url || '/default-avatar.png'} 
-            alt={comment.author.name}
+            alt={comment.author.name} 
             className={styles.authorAvatar} 
           />
           <div>
@@ -66,27 +61,24 @@ const CommentItem = ({ comment, postId, onDeleted }) => {
             <div className={styles.authorDepartment}>{comment.author.department}</div>
           </div>
         </div>
-        <div className={styles.commentDate}>
-          {formatDate(comment.created_at)}
+        <div className={styles.commentMeta}>
+          <div className={styles.commentDate}>{formatDate(comment.created_at)}</div>
+          {isCommentAuthor && (
+            <button 
+              onClick={handleDelete} 
+              disabled={loading}
+              className={styles.deleteButton}
+            >
+              削除
+            </button>
+          )}
         </div>
       </div>
-
+      
       <div className={styles.commentContent}>
         {comment.content}
       </div>
-
-      {canDelete && (
-        <div className={styles.commentActions}>
-          <button 
-            className={styles.deleteButton} 
-            onClick={handleDelete}
-            disabled={loading}
-          >
-            削除
-          </button>
-        </div>
-      )}
-
+      
       {error && <div className={styles.error}>{error}</div>}
     </div>
   );
