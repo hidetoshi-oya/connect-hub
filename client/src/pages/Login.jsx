@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import styles from './Login.module.css';
+import styles from './Auth.module.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,13 +13,14 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // リダイレクト元がある場合はその場所へ、なければホームへ
+  // リダイレクト先を取得
   const redirectPath = location.state?.from?.pathname || '/';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!email.trim() || !password.trim()) {
+    // 簡易バリデーション
+    if (!email || !password) {
       setError('メールアドレスとパスワードを入力してください');
       return;
     }
@@ -27,90 +28,76 @@ const Login = () => {
     try {
       setError('');
       setLoading(true);
+      
+      // ログイン処理
       await login(email, password);
       
-      // ログイン成功後、リダイレクト
-      navigate(redirectPath);
+      // ログイン成功後、リダイレクト先にナビゲート
+      navigate(redirectPath, { replace: true });
     } catch (err) {
-      setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
+      console.error('ログインエラー:', err);
+      setError(err.response?.data?.message || 'ログインに失敗しました');
       setLoading(false);
     }
   };
 
   return (
-    <div className={styles.loginPage}>
-      <div className={styles.loginContainer}>
-        <div className={styles.loginHeader}>
-          <h1 className={styles.logoText}>ConnectHub</h1>
-          <p className={styles.tagline}>社内のつながりを育む</p>
+    <div className={styles.authContainer}>
+      <div className={styles.authCard}>
+        <div className={styles.authHeader}>
+          <h1 className={styles.authTitle}>ConnectHub</h1>
+          <p className={styles.authSubtitle}>社内のつながりを育む</p>
         </div>
         
-        <div className={styles.formContainer}>
-          <h2 className={styles.formTitle}>ログイン</h2>
-          
-          {error && <div className={styles.error}>{error}</div>}
-          
-          <form className={styles.loginForm} onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <label htmlFor="email" className={styles.label}>メールアドレス</label>
-              <input 
-                type="email" 
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={styles.input}
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.label}>パスワード</label>
-              <input 
-                type="password" 
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={styles.input}
-                required
-                disabled={loading}
-              />
-            </div>
-            
-            <button 
-              type="submit" 
-              className={styles.loginButton}
+        <h2 className={styles.formTitle}>ログイン</h2>
+        
+        {error && <div className={styles.error}>{error}</div>}
+        
+        <form onSubmit={handleSubmit} className={styles.authForm}>
+          <div className={styles.formGroup}>
+            <label htmlFor="email">メールアドレス</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="company@example.com"
+              required
               disabled={loading}
-            >
-              {loading ? 'ログイン中...' : 'ログイン'}
-            </button>
-          </form>
-          
-          <div className={styles.formFooter}>
-            <p>
-              アカウントをお持ちでない方は
-              <Link to="/register" className={styles.registerLink}>
-                こちらから登録
-              </Link>
-            </p>
+            />
           </div>
-        </div>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="password">パスワード</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="********"
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className={styles.submitButton}
+            disabled={loading}
+          >
+            {loading ? 'ログイン中...' : 'ログイン'}
+          </button>
+        </form>
         
-        <div className={styles.demoAccounts}>
-          <h3>テストアカウント</h3>
-          <div className={styles.accountList}>
-            <div className={styles.accountItem}>
-              <strong>管理者:</strong> admin@example.com / password
-            </div>
-            <div className={styles.accountItem}>
-              <strong>モデレーター:</strong> moderator@example.com / password
-            </div>
-            <div className={styles.accountItem}>
-              <strong>投稿者:</strong> yamada@example.com / password
-            </div>
-            <div className={styles.accountItem}>
-              <strong>一般ユーザー:</strong> suzuki@example.com / password
-            </div>
+        <div className={styles.authFooter}>
+          <p>
+            アカウントをお持ちでない方は <Link to="/register">新規登録</Link>
+          </p>
+          
+          <div className={styles.testCredentials}>
+            <h3>テストアカウント</h3>
+            <p>管理者: admin@example.com / password</p>
+            <p>一般ユーザー: yamada@example.com / password</p>
           </div>
         </div>
       </div>
