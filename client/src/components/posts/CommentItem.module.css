@@ -1,0 +1,102 @@
+/* CommentItem.module.css */
+.commentItem {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.commentAuthor {
+  display: flex;
+  align-items: center;
+}
+
+.authorAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  border: 1px solid #e1e1e1;
+}
+
+.authorName {
+  font-weight: 500;
+  color: #34495e;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.authorName:hover {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.authorDepartment {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-top: 2px;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: center;
+}
+
+.commentDate {
+  font-size: 12px;
+  color: #95a5a6;
+  margin-right: 10px;
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.deleteButton:hover {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.commentContent {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2c3e50;
+  word-break: break-word;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 576px) {
+  .commentItem {
+    padding: 10px;
+  }
+  
+  .authorAvatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .commentContent {
+    font-size: 13px;
+  }
+}
