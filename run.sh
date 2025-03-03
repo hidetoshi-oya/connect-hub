@@ -111,14 +111,14 @@ docker run -d \
     --name connect-hub-backend \
     --network connect-hub-network \
     -e NODE_ENV=development \
-    -e PORT=5000 \
+    -e PORT=8000 \
     -e DB_HOST=connect-hub-mysql \
     -e DB_PORT=3306 \
     -e DB_USER=connecthub_user \
     -e DB_PASSWORD=connecthub_password \
     -e DB_NAME=connecthub \
     -e JWT_SECRET=your_jwt_secret_key \
-    -p 5000:5000 \
+    -p 8000:8000 \
     -v "$(pwd)/server:/app" \
     --restart always \
     connect-hub-backend
@@ -133,7 +133,7 @@ docker run -d \
     --name connect-hub-frontend \
     --network connect-hub-network \
     -e NODE_ENV=development \
-    -e REACT_APP_API_URL=http://localhost:5000/api \
+    -e REACT_APP_API_URL=http://localhost:8000/api \
     -p 3000:3000 \
     -v "$(pwd)/client:/app" \
     --restart always \
@@ -173,7 +173,7 @@ echo "docker logs connect-hub-frontend  # フロントエンドのログ"
 echo -e "${GREEN}システムの起動が完了しました！${NC}"
 echo "----------------------------------------"
 echo -e "フロントエンド: ${GREEN}http://localhost:3000${NC}"
-echo -e "バックエンドAPI: ${GREEN}http://localhost:5000/api${NC}"
+echo -e "バックエンドAPI: ${GREEN}http://localhost:8000/api${NC}"
 echo "----------------------------------------"
 echo -e "${YELLOW}初期管理者アカウント:${NC}"
 echo "Email: admin@example.com"
