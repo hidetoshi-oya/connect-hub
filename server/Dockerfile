@@ -14,6 +14,9 @@ ENV PATH /app/node_modules/.bin:$PATH
 # nodemonのグローバルパスにシンボリックリンクを作成
 RUN ln -s /usr/local/bin/nodemon /usr/bin/nodemon
 
+# コードをコピーする前に依存関係が正しくインストールされていることを確認
+RUN npm install swagger-jsdoc swagger-ui-express
+
 COPY . .
 
 # ポート番号を8000に変更
