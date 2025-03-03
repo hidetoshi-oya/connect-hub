@@ -32,6 +32,23 @@ if [ ! -d "server/models" ] || [ ! -d "server/config" ]; then
     fi
 fi
 
+# 既存のコンテナがあれば停止して削除
+echo -e "${YELLOW}既存のコンテナを確認しています...${NC}"
+if [ "$(docker ps -a -q -f name=connect-hub-mysql)" ]; then
+    echo "既存のMySQLコンテナを停止・削除します..."
+    docker stop connect-hub-mysql && docker rm connect-hub-mysql
+fi
+
+if [ "$(docker ps -a -q -f name=connect-hub-backend)" ]; then
+    echo "既存のバックエンドコンテナを停止・削除します..."
+    docker stop connect-hub-backend && docker rm connect-hub-backend
+fi
+
+if [ "$(docker ps -a -q -f name=connect-hub-frontend)" ]; then
+    echo "既存のフロントエンドコンテナを停止・削除します..."
+    docker stop connect-hub-frontend && docker rm connect-hub-frontend
+fi
+
 # Docker APIを使って直接コンテナを起動
 echo -e "${YELLOW}Dockerコンテナを起動しています...${NC}"
 
@@ -41,6 +58,7 @@ if ! docker network inspect connect-hub-network &> /dev/null; then
 fi
 
 # MySQLコンテナの起動
+echo "MySQLコンテナを起動しています..."
 docker run -d \
     --name connect-hub-mysql \
     --network connect-hub-network \
@@ -52,6 +70,26 @@ docker run -d \
     -v "$(pwd)/mysql/init:/docker-entrypoint-initdb.d" \
     --restart always \
     mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+# コンテナの起動を待つ
+echo -e "${YELLOW}MySQLサービスの起動を待っています...${NC}"
+# より長い待機時間を設定
+for i in {1..30}; do
+    if docker ps | grep -q "connect-hub-mysql"; then
+        echo "MySQLコンテナが起動しました。初期化を待っています..."
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo -e "${RED}エラー: MySQLコンテナの起動に失敗しました。${NC}"
+        echo "ログを確認してください: docker logs connect-hub-mysql"
+        exit 1
+    fi
+    sleep 1
+done
+
+# MySQLの初期化を待つ（追加の待機時間）
+echo "MySQLデータベースの初期化を待っています..."
+sleep 15
 
 # バックエンドの起動
 echo -e "${YELLOW}バックエンドのビルドと起動...${NC}"
@@ -72,6 +110,9 @@ docker run -d \
     --restart always \
     connect-hub-backend
 
+echo -e "${YELLOW}バックエンドサービスの起動を待っています...${NC}"
+sleep 5
+
 # フロントエンドの起動
 echo -e "${YELLOW}フロントエンドのビルドと起動...${NC}"
 docker build -t connect-hub-frontend ./client
@@ -85,31 +126,27 @@ docker run -d \
     --restart always \
     connect-hub-frontend
 
-# コンテナの起動を待つ
-echo -e "${YELLOW}MySQLサービスの起動を待っています...${NC}"
-sleep 10
+# コンテナが実行中かチェック
+MYSQL_RUNNING=$(docker ps | grep connect-hub-mysql | wc -l)
+BACKEND_RUNNING=$(docker ps | grep connect-hub-backend | wc -l)
+FRONTEND_RUNNING=$(docker ps | grep connect-hub-frontend | wc -l)
 
-# MySQLコンテナが正常に起動したか確認
-if ! docker ps | grep -q "connect-hub-mysql.*Up"; then
-    echo -e "${RED}エラー: MySQLコンテナの起動に失敗しました。${NC}"
+if [ "$MYSQL_RUNNING" -eq 0 ]; then
+    echo -e "${RED}警告: MySQLコンテナが実行されていません。${NC}"
     echo "ログを確認してください: docker logs connect-hub-mysql"
-    exit 1
+else
+    echo -e "${GREEN}MySQLサービスが正常に起動しました。${NC}"
 fi
 
-echo -e "${YELLOW}バックエンドサービスの起動を待っています...${NC}"
-sleep 5
-
-# バックエンドコンテナが正常に起動したか確認
-if ! docker ps | grep -q "connect-hub-backend"; then
-    echo -e "${RED}警告: バックエンドコンテナが正常に起動していない可能性があります。${NC}"
+if [ "$BACKEND_RUNNING" -eq 0 ]; then
+    echo -e "${RED}警告: バックエンドコンテナが実行されていません。${NC}"
     echo "ログを確認してください: docker logs connect-hub-backend"
 else
     echo -e "${GREEN}バックエンドサービスが正常に起動しました。${NC}"
 fi
 
-# フロントエンドコンテナが正常に起動したか確認
-if ! docker ps | grep -q "connect-hub-frontend"; then
-    echo -e "${RED}警告: フロントエンドコンテナが正常に起動していない可能性があります。${NC}"
+if [ "$FRONTEND_RUNNING" -eq 0 ]; then
+    echo -e "${RED}警告: フロントエンドコンテナが実行されていません。${NC}"
     echo "ログを確認してください: docker logs connect-hub-frontend"
 else
     echo -e "${GREEN}フロントエンドサービスが正常に起動しました。${NC}"
@@ -125,6 +162,8 @@ echo "Email: admin@example.com"
 echo "Password: password"
 echo "----------------------------------------"
 echo -e "${YELLOW}システムを停止するには以下のコマンドを実行:${NC}"
+echo "./stop.sh"
+echo "または"
 echo "docker stop connect-hub-mysql connect-hub-backend connect-hub-frontend"
 echo "docker rm connect-hub-mysql connect-hub-backend connect-hub-frontend"
 
