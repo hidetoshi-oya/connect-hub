@@ -9,12 +9,18 @@ COPY package.json ./
 RUN rm -rf node_modules
 
 # 依存関係をインストール
-RUN npm install
+# 必要なパッケージを明示的にインストール
+RUN npm install react react-dom
+RUN npm install react-router-dom
+RUN npm install react-scripts
+RUN npm install web-vitals
+RUN npm install axios
+RUN npm install date-fns
 
 # プロジェクトファイルをコピー
 COPY . .
 
 EXPOSE 3000
 
-# シンプルな起動方法
-CMD ["sh", "-c", "node node_modules/react-scripts/scripts/start.js"]
+# より確実なReactアプリの起動方法
+CMD ["npx", "--no-install", "react-scripts", "start"]
