@@ -32,7 +32,7 @@ chmod +x run.sh
 起動スクリプトによってシステムが正常に起動すると、以下のURLでアクセスできます：
 
 - フロントエンド: http://localhost:3000
-- バックエンドAPI: http://localhost:5000/api
+- バックエンドAPI: http://localhost:8000/api
 
 ## 初期アカウント
 
@@ -57,25 +57,25 @@ chmod +x run.sh
 
 ```
 .
-├── docker-compose.yml
-├── client/
-│   └── Dockerfile
-├── mysql/
-│   └── init/
-│       ├── 01-schema.sql
-│       └── 02-test-data.sql
-└── server/
-    ├── Dockerfile
-    ├── config/
-    │   └── db.config.js
-    └── models/
-        ├── Category.js
-        ├── Comment.js
-        ├── Like.js
-        ├── Post.js
-        ├── PostCategory.js
-        ├── User.js
-        └── index.js
+├─ docker-compose.yml
+├─ client/
+│   └─ Dockerfile
+├─ mysql/
+│   └─ init/
+│       ├─ 01-schema.sql
+│       └─ 02-test-data.sql
+└─ server/
+    ├─ Dockerfile
+    ├─ config/
+    │   └─ db.config.js
+    └─ models/
+        ├─ Category.js
+        ├─ Comment.js
+        ├─ Like.js
+        ├─ Post.js
+        ├─ PostCategory.js
+        ├─ User.js
+        └─ index.js
 ```
 
 ### 2. Docker Composeでコンテナを起動
