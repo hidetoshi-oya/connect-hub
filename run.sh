@@ -32,8 +32,10 @@ if [ ! -d "server/models" ] || [ ! -d "server/config" ]; then
     fi
 fi
 
-# 既存のコンテナがあれば停止して削除
-echo -e "${YELLOW}既存のコンテナを確認しています...${NC}"
+# 既存のコンテナとイメージをクリーンアップ
+echo -e "${YELLOW}既存のコンテナとイメージを確認しています...${NC}"
+
+# コンテナの停止と削除
 if [ "$(docker ps -a -q -f name=connect-hub-mysql)" ]; then
     echo "既存のMySQLコンテナを停止・削除します..."
     docker stop connect-hub-mysql && docker rm connect-hub-mysql
@@ -47,6 +49,17 @@ fi
 if [ "$(docker ps -a -q -f name=connect-hub-frontend)" ]; then
     echo "既存のフロントエンドコンテナを停止・削除します..."
     docker stop connect-hub-frontend && docker rm connect-hub-frontend
+fi
+
+# イメージの削除（強制再ビルドのため）
+if [ "$(docker images -q connect-hub-backend)" ]; then
+    echo "既存のバックエンドイメージを削除します..."
+    docker rmi connect-hub-backend
+fi
+
+if [ "$(docker images -q connect-hub-frontend)" ]; then
+    echo "既存のフロントエンドイメージを削除します..."
+    docker rmi connect-hub-frontend
 fi
 
 # Docker APIを使って直接コンテナを起動
@@ -89,11 +102,11 @@ done
 
 # MySQLの初期化を待つ（追加の待機時間）
 echo "MySQLデータベースの初期化を待っています..."
-sleep 15
+sleep 20
 
 # バックエンドの起動
 echo -e "${YELLOW}バックエンドのビルドと起動...${NC}"
-docker build -t connect-hub-backend ./server
+docker build -t connect-hub-backend ./server --no-cache
 docker run -d \
     --name connect-hub-backend \
     --network connect-hub-network \
@@ -115,7 +128,7 @@ sleep 5
 
 # フロントエンドの起動
 echo -e "${YELLOW}フロントエンドのビルドと起動...${NC}"
-docker build -t connect-hub-frontend ./client
+docker build -t connect-hub-frontend ./client --no-cache
 docker run -d \
     --name connect-hub-frontend \
     --network connect-hub-network \
@@ -151,6 +164,11 @@ if [ "$FRONTEND_RUNNING" -eq 0 ]; then
 else
     echo -e "${GREEN}フロントエンドサービスが正常に起動しました。${NC}"
 fi
+
+echo -e "${YELLOW}各サービスのログを確認するには:${NC}"
+echo "docker logs connect-hub-mysql     # MySQLのログ"
+echo "docker logs connect-hub-backend   # バックエンドのログ"
+echo "docker logs connect-hub-frontend  # フロントエンドのログ"
 
 echo -e "${GREEN}システムの起動が完了しました！${NC}"
 echo "----------------------------------------"
