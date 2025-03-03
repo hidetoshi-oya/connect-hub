@@ -1,30 +1,24 @@
-FROM node:16-alpine
+FROM node:16
 
 WORKDIR /app
 
-# パッケージファイルをコピー
+# package.jsonをコピー
 COPY package.json ./
-COPY package-lock.json* ./
 
-# 必要な全ての依存関係を明示的にインストール
-RUN npm install express \
-    cors \
-    dotenv \
-    bcrypt \
-    jsonwebtoken \
-    mysql2 \
-    sequelize \
-    swagger-jsdoc \
-    swagger-ui-express \
-    && npm install -g nodemon
+# 依存関係をインストール
+RUN npm install
 
-# アプリケーションのソースコードをコピー
+# nodemonをグローバルにインストール
+RUN npm install -g nodemon
+
+# Swagger関連の依存関係を明示的にインストール
+RUN npm install swagger-jsdoc swagger-ui-express
+
+# ソースコードをコピー
 COPY . .
 
-# 環境変数のPATHを設定
-ENV PATH /app/node_modules/.bin:$PATH
-
-# ポート番号を8000に変更
+# ポート番号を8000に設定
 EXPOSE 8000
 
+# 起動コマンド
 CMD ["nodemon", "server.js"]
