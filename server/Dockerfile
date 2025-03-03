@@ -4,10 +4,12 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+# 開発依存関係を含めてすべての依存関係をインストール
+RUN npm install --include=dev
 
 COPY . .
 
-EXPOSE 5000
+# ポート番号を8000に変更
+EXPOSE 8000
 
 CMD ["npm", "run", "dev"]
