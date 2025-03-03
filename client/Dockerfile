@@ -1,9 +1,12 @@
-FROM node:16
+FROM node:20
 
 WORKDIR /app
 
 # package.jsonとpackage-lock.jsonをコピー
 COPY package.json ./
+
+# node_modulesが存在する場合は削除
+RUN rm -rf node_modules
 
 # 依存関係をインストール
 RUN npm install
