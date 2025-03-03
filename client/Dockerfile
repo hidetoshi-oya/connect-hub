@@ -1,31 +1,17 @@
-FROM node:16-alpine
+FROM node:16
 
 WORKDIR /app
 
-# パッケージファイルをコピー
+# package.jsonとpackage-lock.jsonをコピー
 COPY package.json ./
-COPY package-lock.json* ./
 
-# 必要な全ての依存関係を明示的にインストール
-RUN npm install react \
-    react-dom \
-    react-router-dom \
-    react-scripts \
-    web-vitals \
-    axios \
-    date-fns \
-    @testing-library/jest-dom \
-    @testing-library/react \
-    @testing-library/user-event
+# 依存関係をインストール
+RUN npm install
 
-# アプリケーションのソースコードをコピー
+# プロジェクトファイルをコピー
 COPY . .
 
-# 環境変数のPATHを設定
-ENV PATH /app/node_modules/.bin:$PATH
-
-# ポート番号を3000に設定
 EXPOSE 3000
 
-# アプリケーションを起動
-CMD ["npx", "react-scripts", "start"]
+# シンプルな起動方法
+CMD ["sh", "-c", "node node_modules/react-scripts/scripts/start.js"]
