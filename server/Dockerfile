@@ -2,23 +2,31 @@ FROM node:16
 
 WORKDIR /app
 
-# package.jsonをコピー
-COPY package.json ./
+# package.jsonとpackage-lock.jsonをコピー（もし存在する場合）
+COPY package*.json ./
 
-# 依存関係をインストール
-RUN npm install
+# node_modulesが存在する場合は削除
+RUN rm -rf node_modules
 
-# nodemonをグローバルにインストール
+# 新規にインストールする
+# インストール時にみやすいように各ステップを分ける
+RUN npm install express
+RUN npm install cors
+RUN npm install dotenv
+RUN npm install bcrypt
+RUN npm install jsonwebtoken
+RUN npm install mysql2
+RUN npm install sequelize
+RUN npm install swagger-jsdoc
+RUN npm install swagger-ui-express
 RUN npm install -g nodemon
 
-# Swagger関連の依存関係を明示的にインストール
-RUN npm install swagger-jsdoc swagger-ui-express
-
-# ソースコードをコピー
+# 全てのソースコードをコピー
 COPY . .
 
 # ポート番号を8000に設定
 EXPOSE 8000
 
-# 起動コマンド
-CMD ["nodemon", "server.js"]
+# 直接nodeで実行する
+# 開発中の場合はnodemonも選択可能
+CMD ["node", "server.js"]
