@@ -3,15 +3,20 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const PrivateRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
-
-  // 認証状態の読み込み中は何も表示しない
+  const { currentUser, loading } = useAuth();
+  
+  // 認証情報のロード中は何も表示しない
   if (loading) {
-    return <div>Loading...</div>;
+    return null;
   }
-
-  // 認証されていない場合はログインページにリダイレクト
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
+  
+  // ログインしていない場合はログインページにリダイレクト
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  // ログイン済みの場合は子ルートを表示
+  return <Outlet />;
 };
 
 export default PrivateRoute;
