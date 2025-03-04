@@ -1,0 +1,153 @@
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.formControl {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.formControl:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+.textArea {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.error {
+  color: #d9534f;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.categorySelect {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.categorySelect:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+.checkboxGroup {
+  margin-top: 0.5rem;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.checkbox input {
+  margin-right: 0.5rem;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+}
+
+.primaryButton:hover {
+  background-color: #3a80d2;
+}
+
+.secondaryButton {
+  background-color: white;
+  color: #6c757d;
+  border: 1px solid #6c757d;
+}
+
+.secondaryButton:hover {
+  background-color: #f8f9fa;
+}
+
+.buttonWithIcon {
+  display: flex;
+  align-items: center;
+}
+
+.buttonWithIcon svg {
+  margin-right: 0.5rem;
+}
+
+.imagePreviewContainer {
+  margin-top: 1rem;
+}
+
+.imagePreview {
+  max-width: 100%;
+  max-height: 200px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.removeImageButton {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.5rem;
+  cursor: pointer;
+}
+
+.removeImageButton:hover {
+  background-color: #c9302c;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.fileInputLabel:hover {
+  background-color: #e9ecef;
+}
+
+.fileInputLabel svg {
+  margin-right: 0.5rem;
+}
