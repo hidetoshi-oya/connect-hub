@@ -1,8 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PostForm from '../components/posts/PostForm';
 import styles from './CreatePost.module.css';
 
 const CreatePost = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  // 投稿送信処理
+  const handleSubmit = async (postData) => {
+    try {
+      setIsSubmitting(true);
+      
+      // 実際の環境では、ここでAPIを使って投稿データをサーバーに送信します
+      // const response = await axios.post('/api/posts', postData);
+      
+      // モック処理（実際はAPIを使います）
+      console.log('投稿データ:', postData);
+      
+      // 送信成功後、少し待機してからホーム画面に遷移
+      setTimeout(() => {
+        alert('投稿が作成されました！');
+        navigate('/');
+      }, 500);
+      
+    } catch (error) {
+      console.error('投稿の作成に失敗しました:', error);
+      alert('投稿の作成に失敗しました。再度お試しください。');
+      setIsSubmitting(false);
+    }
+  };
+
+  // キャンセル処理
+  const handleCancel = () => {
+    if (window.confirm('投稿作成をキャンセルしますか？入力した内容は失われます。')) {
+      navigate('/');
+    }
+  };
+
   return (
     <div className={styles.createPostPage}>
       <div className={styles.pageHeader}>
@@ -13,7 +48,11 @@ const CreatePost = () => {
       </div>
       
       <div className={styles.formContainer}>
-        <PostForm />
+        <PostForm 
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          isSubmitting={isSubmitting}
+        />
       </div>
       
       <div className={styles.guideContainer}>
