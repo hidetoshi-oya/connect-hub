@@ -1,177 +1,174 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './PostForm.module.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
-const PostForm = ({ post, isEdit = false }) => {
-  const [title, setTitle] = useState(post?.title || '');
-  const [content, setContent] = useState(post?.content || '');
-  const [selectedCategories, setSelectedCategories] = useState(post?.categories?.map(c => c.name) || []);
-  const [availableCategories, setAvailableCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false, isEdit = false }) => {
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
-
-  // カテゴリ一覧を取得
+  
+  const [title, setTitle] = useState(initialValues.title || '');
+  const [content, setContent] = useState(initialValues.content || '');
+  const [selectedCategories, setSelectedCategories] = useState(initialValues.categories || []);
+  const [isPinned, setIsPinned] = useState(initialValues.isPinned || false);
+  const [categories, setCategories] = useState([]);
+  const [errors, setErrors] = useState({});
+  
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get(`${API_URL}/categories`);
-        setAvailableCategories(response.data);
+        // 実際はAPIを呼び出してカテゴリリストを取得する
+        // const response = await axios.get('/api/categories');
+        
+        // モックデータ
+        const mockCategories = [
+          { id: 1, name: 'お知らせ', description: '会社からの公式なお知らせや通知を掲載します', is_active: true },
+          { id: 2, name: 'プロジェクト', description: '社内の各種プロジェクトに関する情報を共有します', is_active: true },
+          { id: 3, name: '社員インタビュー', description: '社員の仕事や趣味などを紹介するインタビュー記事です', is_active: true },
+          { id: 4, name: 'イベント', description: '社内イベントや外部イベントの情報を掲載します', is_active: true },
+          { id: 5, name: '社内システム', description: '業務システムや社内ツールに関する情報です', is_active: true },
+          { id: 6, name: '募集', description: '社内での募集やプロジェクトメンバー募集などの情報です', is_active: true },
+          { id: 7, name: 'マーケティング部', description: 'マーケティング部からの情報発信です', is_active: true },
+          { id: 8, name: '営業部', description: '営業部からの情報発信です', is_active: true },
+          { id: 9, name: '開発部', description: '開発部からの情報発信です', is_active: true },
+          { id: 10, name: '人事部', description: '人事部からの情報発信です', is_active: true },
+          { id: 11, name: '広報部', description: '広報部からの情報発信です', is_active: true },
+          { id: 12, name: 'IT部', description: 'IT部からの情報発信です', is_active: true }
+        ];
+        
+        setCategories(mockCategories);
       } catch (err) {
-        console.error('カテゴリの取得に失敗:', err);
-        setError('カテゴリの読み込みに失敗しました');
+        console.error('カテゴリの取得に失敗しました', err);
       }
     };
-
+    
     fetchCategories();
   }, []);
-
-  // カテゴリの選択/解除
-  const toggleCategory = (categoryName) => {
+  
+  const handleCategoryChange = (categoryName) => {
     if (selectedCategories.includes(categoryName)) {
-      setSelectedCategories(selectedCategories.filter(c => c !== categoryName));
+      setSelectedCategories(selectedCategories.filter(cat => cat !== categoryName));
     } else {
       setSelectedCategories([...selectedCategories, categoryName]);
     }
   };
-
-  // フォーム送信
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // 入力検証
-    if (!title.trim() || !content.trim()) {
-      setError('タイトルと本文は必須です');
-      return;
+  
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (title.trim() === '') {
+      newErrors.title = 'タイトルを入力してください';
+    } else if (title.length > 100) {
+      newErrors.title = 'タイトルは100文字以内で入力してください';
     }
-
+    
+    if (content.trim() === '') {
+      newErrors.content = '内容を入力してください';
+    }
+    
     if (selectedCategories.length === 0) {
-      setError('少なくとも1つのカテゴリを選択してください');
+      newErrors.categories = 'カテゴリを1つ以上選択してください';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
-
-    try {
-      setLoading(true);
-      setError(null);
-      setSuccess(null);
-
-      const token = localStorage.getItem('token');
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
-
-      const postData = {
-        title,
-        content,
-        categories: selectedCategories
-      };
-
-      let response;
-
-      if (isEdit && post) {
-        // 投稿の更新
-        response = await axios.put(`${API_URL}/posts/${post.id}`, postData, config);
-        setSuccess('投稿を更新しました');
-      } else {
-        // 新規投稿
-        response = await axios.post(`${API_URL}/posts`, postData, config);
-        setSuccess('投稿を作成しました');
-        
-        // フォームをリセット（新規投稿の場合のみ）
-        setTitle('');
-        setContent('');
-        setSelectedCategories([]);
-      }
-
-      setLoading(false);
-
-      // 成功メッセージを表示して、少し待ってから詳細ページに遷移
-      setTimeout(() => {
-        navigate(`/posts/${response.data.id}`);
-      }, 1500);
-    } catch (err) {
-      console.error('投稿の保存に失敗:', err);
-      setError(err.response?.data?.message || '投稿の保存に失敗しました');
-      setLoading(false);
-    }
+    
+    onSubmit({
+      title,
+      content,
+      categories: selectedCategories,
+      isPinned
+    });
   };
-
+  
   return (
-    <form className={styles.postForm} onSubmit={handleSubmit}>
-      <h2 className={styles.formTitle}>{isEdit ? '投稿を編集' : '新規投稿'}</h2>
-
+    <form onSubmit={handleSubmit}>
       <div className={styles.formGroup}>
-        <label htmlFor="title" className={styles.label}>タイトル</label>
+        <label className={styles.formLabel} htmlFor="title">タイトル</label>
         <input
-          type="text"
           id="title"
+          type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="タイトルを入力してください"
-          className={styles.titleInput}
-          disabled={loading}
-          required
+          className={styles.formControl}
+          placeholder="投稿のタイトル"
+          disabled={isSubmitting}
         />
+        {errors.title && <div className={styles.error}>{errors.title}</div>}
       </div>
-
+      
       <div className={styles.formGroup}>
-        <label htmlFor="content" className={styles.label}>本文</label>
+        <label className={styles.formLabel} htmlFor="content">内容</label>
         <textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="本文を入力してください"
-          className={styles.contentInput}
-          rows={10}
-          disabled={loading}
-          required
-        />
+          className={`${styles.formControl} ${styles.textArea}`}
+          placeholder="投稿の内容"
+          rows="10"
+          disabled={isSubmitting}
+        ></textarea>
+        {errors.content && <div className={styles.error}>{errors.content}</div>}
       </div>
-
+      
       <div className={styles.formGroup}>
-        <label className={styles.label}>カテゴリ</label>
-        <div className={styles.categoriesContainer}>
-          {availableCategories.map(category => (
-            <div key={category.id} className={styles.categoryItem}>
+        <label className={styles.formLabel}>カテゴリ</label>
+        <div className={styles.checkboxGroup}>
+          {categories.map((category) => (
+            <div key={category.id} className={styles.checkbox}>
               <input
                 type="checkbox"
                 id={`category-${category.id}`}
+                value={category.name}
                 checked={selectedCategories.includes(category.name)}
-                onChange={() => toggleCategory(category.name)}
-                disabled={loading}
+                onChange={() => handleCategoryChange(category.name)}
+                disabled={isSubmitting}
               />
-              <label htmlFor={`category-${category.id}`} className={styles.categoryLabel}>
-                {category.name}
-              </label>
+              <label htmlFor={`category-${category.id}`}>{category.name}</label>
             </div>
           ))}
         </div>
+        {errors.categories && <div className={styles.error}>{errors.categories}</div>}
       </div>
-
-      {error && <div className={styles.error}>{error}</div>}
-      {success && <div className={styles.success}>{success}</div>}
-
-      <div className={styles.formActions}>
+      
+      {(currentUser?.role === 'admin' || currentUser?.role === 'moderator') && (
+        <div className={styles.formGroup}>
+          <div className={styles.checkbox}>
+            <input
+              type="checkbox"
+              id="isPinned"
+              checked={isPinned}
+              onChange={(e) => setIsPinned(e.target.checked)}
+              disabled={isSubmitting}
+            />
+            <label htmlFor="isPinned">トップに固定する</label>
+          </div>
+        </div>
+      )}
+      
+      <div className={styles.buttonContainer}>
         <button
           type="button"
-          onClick={() => navigate(-1)}
-          className={styles.cancelButton}
-          disabled={loading}
+          onClick={onCancel}
+          className={`${styles.button} ${styles.secondaryButton}`}
+          disabled={isSubmitting}
         >
           キャンセル
         </button>
+        
         <button
           type="submit"
-          className={styles.submitButton}
-          disabled={loading}
+          className={`${styles.button} ${styles.primaryButton}`}
+          disabled={isSubmitting}
         >
-          {loading ? '保存中...' : isEdit ? '更新する' : '投稿する'}
+          {isSubmitting ? '送信中...' : isEdit ? '更新する' : '投稿する'}
         </button>
       </div>
     </form>
