@@ -97,9 +97,6 @@ const Home = () => {
         console.error('投稿の取得に失敗:', err);
         setError('投稿の読み込みに失敗しました。後でもう一度お試しください。');
         
-        // クエリパラメータを再取得（エラー処理内でも利用するため）
-        const { category, search } = getQueryParams();
-        
         // エラー時はモックデータを使用
         const mockPosts = [
           {
@@ -140,15 +137,17 @@ const Home = () => {
         
         // カテゴリでフィルタリング
         let filteredPosts = [...mockPosts];
-        if (category) {
+        const queryParams = getQueryParams();
+        
+        if (queryParams.category) {
           filteredPosts = filteredPosts.filter(post => 
-            post.categories.some(cat => cat.name === category)
+            post.categories.some(cat => cat.name === queryParams.category)
           );
         }
 
         // 検索でフィルタリング
-        if (search) {
-          const searchLower = search.toLowerCase();
+        if (queryParams.search) {
+          const searchLower = queryParams.search.toLowerCase();
           filteredPosts = filteredPosts.filter(post => 
             post.title.toLowerCase().includes(searchLower) || 
             post.content.toLowerCase().includes(searchLower)
