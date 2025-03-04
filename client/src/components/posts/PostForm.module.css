@@ -134,113 +134,69 @@
   background-color: #c9302c;
 }
 
-.fileInput {
-  display: none;
-}
-
-.fileInputLabel {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
+/* リッチエディタ関連の新しいスタイル */
+.quillWrapper {
   border-radius: 4px;
-  cursor: pointer;
-}
-
-.fileInputLabel:hover {
-  background-color: #e9ecef;
-}
-
-.fileInputLabel svg {
-  margin-right: 0.5rem;
-}
-
-/* 新しいスタイル（リッチエディタ用） */
-.richEditorToggle {
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-}
-
-.richEditorToggle input {
-  margin-right: 0.5rem;
-}
-
-.formatToolbar {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background-color: #f8f9fa;
   border: 1px solid #ced4da;
-  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.formatButton {
-  padding: 0.25rem 0.5rem;
-  background-color: white;
-  border: 1px solid #ced4da;
+.quillEditor {
+  height: 300px;
+  overflow-y: auto;
+}
+
+/* ドロップゾーン関連のスタイル */
+.dropzone {
+  border: 2px dashed #ced4da;
   border-radius: 4px;
-  cursor: pointer;
-  min-width: 2rem;
+  padding: 2rem;
   text-align: center;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.formatButton:hover {
+.dragActive {
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
+}
+
+.dropzoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.browseButton {
+  position: relative;
+  padding: 0.5rem 1rem;
   background-color: #e9ecef;
-}
-
-.previewContainer {
-  margin-top: 1rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  padding: 1rem;
-  background-color: white;
+  overflow: hidden;
+  cursor: pointer;
 }
 
-.previewContainer h4 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 0.5rem;
+.browseButton:hover {
+  background-color: #dee2e6;
 }
 
-.contentPreview {
-  padding: 0.5rem;
-  overflow-wrap: break-word;
-}
-
-.contentPreview h2 {
-  font-size: 1.5rem;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.contentPreview h3 {
-  font-size: 1.25rem;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.contentPreview p {
-  margin-bottom: 1rem;
-}
-
-.contentPreview li {
-  margin-left: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.contentPreview img {
-  max-width: 100%;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+.fileInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* サンプル画像セレクタ */
 .sampleImagesContainer {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
 
 .sampleImagesLabel {
@@ -274,4 +230,38 @@
   height: 60px;
   object-fit: cover;
   display: block;
+}
+
+/* リッチエディタトグル */
+.richEditorToggle {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.richEditorToggle input {
+  margin-right: 0.5rem;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .checkboxGroup {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .buttonContainer {
+    flex-direction: column;
+  }
+  
+  .button {
+    width: 100%;
+  }
+  
+  .dropzone {
+    padding: 1rem;
+  }
+  
+  .sampleImageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
 }
