@@ -171,7 +171,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./server.js'], // APIルートが定義されているファイル
+  apis: ['./*.js'], // カレントディレクトリのJSファイル
 };
 
 const swaggerSpecs = swaggerJsDoc(swaggerOptions);
