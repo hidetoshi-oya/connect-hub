@@ -135,10 +135,11 @@ const Home = () => {
           }
         ];
         
-        // カテゴリでフィルタリング
-        let filteredPosts = [...mockPosts];
+        // クエリパラメータを取得
         const queryParams = getQueryParams();
         
+        // カテゴリでフィルタリング
+        let filteredPosts = [...mockPosts];
         if (queryParams.category) {
           filteredPosts = filteredPosts.filter(post => 
             post.categories.some(cat => cat.name === queryParams.category)
