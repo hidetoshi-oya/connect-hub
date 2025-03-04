@@ -1,54 +1,74 @@
-// models/index.js - モデル関連付け
-const sequelize = require('../config/db.config');
-const User = require('./User');
-const Post = require('./Post');
-const Comment = require('./Comment');
-const Category = require('./Category');
-const Like = require('./Like');
-const PostCategory = require('./PostCategory');
+const dbConfig = require('../config/db.config');
+const { Sequelize, DataTypes } = require('sequelize');
 
-// ユーザーと投稿の関連付け
-User.hasMany(Post, { foreignKey: 'author_id', as: 'posts' });
-Post.belongsTo(User, { foreignKey: 'author_id', as: 'author' });
+// Sequelizeインスタンスの作成
+const sequelize = new Sequelize(
+  dbConfig.DB,
+  dbConfig.USER,
+  dbConfig.PASSWORD,
+  {
+    host: dbConfig.HOST,
+    dialect: dbConfig.dialect,
+    operatorsAliases: 0,
+    pool: {
+      max: dbConfig.pool.max,
+      min: dbConfig.pool.min,
+      acquire: dbConfig.pool.acquire,
+      idle: dbConfig.pool.idle
+    },
+    logging: console.log // 開発中はSQLログを表示
+  }
+);
 
-// ユーザーとコメントの関連付け
-User.hasMany(Comment, { foreignKey: 'author_id', as: 'comments' });
-Comment.belongsTo(User, { foreignKey: 'author_id', as: 'author' });
+// データベース接続オブジェクト
+const db = {};
 
-// 投稿とコメントの関連付け
-Post.hasMany(Comment, { foreignKey: 'post_id', as: 'comments' });
-Comment.belongsTo(Post, { foreignKey: 'post_id', as: 'post' });
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
 
-// 投稿といいねの関連付け
-Post.hasMany(Like, { foreignKey: 'post_id', as: 'likes' });
-Like.belongsTo(Post, { foreignKey: 'post_id', as: 'post' });
+// モデルのインポート
+db.User = require('./user.model')(sequelize, DataTypes);
+db.Post = require('./post.model')(sequelize, DataTypes);
+db.Category = require('./category.model')(sequelize, DataTypes);
+db.Comment = require('./comment.model')(sequelize, DataTypes);
+db.Like = require('./like.model')(sequelize, DataTypes);
+db.PostCategory = require('./postCategory.model')(sequelize, DataTypes);
 
-// ユーザーといいねの関連付け
-User.hasMany(Like, { foreignKey: 'user_id', as: 'likes' });
-Like.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+// リレーションシップの設定
+// User - Post (1対多)
+db.User.hasMany(db.Post, { as: 'posts', foreignKey: 'authorId' });
+db.Post.belongsTo(db.User, { as: 'author', foreignKey: 'authorId' });
 
-// 投稿とカテゴリの関連付け（多対多）
-Post.belongsToMany(Category, { 
-  through: PostCategory,
-  foreignKey: 'post_id',
-  otherKey: 'category_name',
-  as: 'categories' 
+// User - Comment (1対多)
+db.User.hasMany(db.Comment, { as: 'comments', foreignKey: 'authorId' });
+db.Comment.belongsTo(db.User, { as: 'author', foreignKey: 'authorId' });
+
+// Post - Comment (1対多)
+db.Post.hasMany(db.Comment, { as: 'comments', foreignKey: 'postId' });
+db.Comment.belongsTo(db.Post, { as: 'post', foreignKey: 'postId' });
+
+// Post - Category (多対多)
+db.Post.belongsToMany(db.Category, { 
+  through: db.PostCategory,
+  as: 'categories',
+  foreignKey: 'postId' 
+});
+db.Category.belongsToMany(db.Post, { 
+  through: db.PostCategory,
+  as: 'posts',
+  foreignKey: 'categoryId' 
 });
 
-Category.belongsToMany(Post, { 
-  through: PostCategory,
-  foreignKey: 'category_name',
-  otherKey: 'post_id',
-  as: 'posts' 
+// User - Post (いいね) (多対多)
+db.User.belongsToMany(db.Post, { 
+  through: db.Like,
+  as: 'likedPosts',
+  foreignKey: 'userId' 
+});
+db.Post.belongsToMany(db.User, { 
+  through: db.Like,
+  as: 'likedBy',
+  foreignKey: 'postId' 
 });
 
-// 全てのモデルをエクスポート
-module.exports = {
-  sequelize,
-  User,
-  Post,
-  Comment,
-  Category,
-  Like,
-  PostCategory
-};
+module.exports = db;
