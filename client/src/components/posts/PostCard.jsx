@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import LikeButton from './LikeButton';
 
 // スタイル - 将来的にはモジュールCSSを作成
 const styles = {
@@ -133,13 +134,41 @@ const styles = {
     fontSize: '0.9rem',
     marginBottom: '0.5rem',
   },
+  likeButtonContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: '1rem',
+  },
+  commentCount: {
+    display: 'flex',
+    alignItems: 'center',
+  }
 };
 
-const PostCard = ({ post, currentUser }) => {
-  const [hover, setHover] = React.useState(false);
+const PostCard = ({ post, currentUser, onUpdate }) => {
+  const [hover, setHover] = useState(false);
+  const [updatedPost, setUpdatedPost] = useState(post);
   
-  const formattedDate = format(new Date(post.created_at), 'yyyy年MM月dd日', { locale: ja });
+  // フォーマット済みの作成日付
+  const formattedDate = format(new Date(updatedPost.created_at), 'yyyy年MM月dd日', { locale: ja });
   
+  // 投稿の更新が発生した場合
+  const handlePostUpdate = (updates) => {
+    const newPostData = { ...updatedPost, ...updates };
+    setUpdatedPost(newPostData);
+    
+    // 親コンポーネントのonUpdateが存在する場合呼び出し
+    if (onUpdate) {
+      onUpdate(updatedPost.id, updates);
+    }
+  };
+  
+  // LikeButtonからの更新を処理
+  const handleLikeUpdate = (updates) => {
+    handlePostUpdate(updates);
+  };
+  
+  // コンテンツの切り詰め
   const truncateContent = (text, maxLength = 150) => {
     if (!text) return '';
 
@@ -158,82 +187,96 @@ const PostCard = ({ post, currentUser }) => {
   };
   
   return (
-    <Link to={`/posts/${post.id}`} style={styles.link}>
-      <div
-        style={{
-          ...styles.card,
-          ...(hover ? styles.cardHover : {}),
-          ...(post.isPinned ? styles.pinnedCard : {})
-        }}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-      >
-        <div style={styles.imageContainer}>
-          {post.headerImage ? (
-            <img
-              src={post.headerImage}
-              alt={post.title}
-              style={styles.headerImage}
-            />
-          ) : (
-            <div style={styles.placeholderImage}>
-              No Image
-            </div>
-          )}
-        </div>
-        
-        <div style={styles.contentWrapper}>
-          {post.isPinned && (
-            <div style={styles.pinnedIndicator}>
-              <span style={{ marginRight: '0.25rem' }}>📌</span>
-              固定投稿
-            </div>
-          )}
-          
-          <h3 style={styles.title}>{post.title}</h3>
-          
-          <div style={styles.metaContainer}>
-            <div style={styles.meta}>
-              <div style={styles.author}>
-                <img
-                  src={post.author.avatar_url || '/default-avatar.png'}
-                  alt={post.author.name}
-                  style={styles.authorAvatar}
-                />
-                <span>{post.author.name}</span>
+    <div className="post-card-container">
+      <Link to={`/posts/${updatedPost.id}`} style={styles.link}>
+        <div
+          style={{
+            ...styles.card,
+            ...(hover ? styles.cardHover : {}),
+            ...(updatedPost.isPinned ? styles.pinnedCard : {})
+          }}
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+        >
+          <div style={styles.imageContainer}>
+            {updatedPost.headerImage ? (
+              <img
+                src={updatedPost.headerImage}
+                alt={updatedPost.title}
+                style={styles.headerImage}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://via.placeholder.com/200x200?text=画像が見つかりません';
+                }}
+              />
+            ) : (
+              <div style={styles.placeholderImage}>
+                No Image
               </div>
-              <div style={styles.date}>{formattedDate}</div>
-              <div style={styles.department}>{post.author.department}</div>
-            </div>
-            
-            <div style={styles.categories}>
-              {post.categories.map((category, index) => (
-                <span key={index} style={styles.category}>
-                  {category.name}
-                </span>
-              ))}
-            </div>
+            )}
           </div>
           
-          <div style={styles.footer}>
-            <div style={styles.stats}>
-              <div style={styles.stat}>
-                <span style={styles.icon}>👍</span>
-                {post.likes.length}
+          <div style={styles.contentWrapper}>
+            {updatedPost.isPinned && (
+              <div style={styles.pinnedIndicator}>
+                <span style={{ marginRight: '0.25rem' }}>📌</span>
+                固定投稿
               </div>
-              <div style={styles.stat}>
-                <span style={styles.icon}>💬</span>
-                {post.comments.length}
+            )}
+            
+            <h3 style={styles.title}>{updatedPost.title}</h3>
+            
+            <div style={styles.metaContainer}>
+              <div style={styles.meta}>
+                <div style={styles.author}>
+                  <img
+                    src={updatedPost.author.avatar_url || '/default-avatar.png'}
+                    alt={updatedPost.author.name}
+                    style={styles.authorAvatar}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/default-avatar.png';
+                    }}
+                  />
+                  <span>{updatedPost.author.name}</span>
+                </div>
+                <div style={styles.date}>{formattedDate}</div>
+                <div style={styles.department}>{updatedPost.author.department}</div>
+              </div>
+              
+              <div style={styles.categories}>
+                {updatedPost.categories.map((category, index) => (
+                  <span key={index} style={styles.category}>
+                    {category.name}
+                  </span>
+                ))}
               </div>
             </div>
             
-            <div style={styles.readMore}>
-              続きを読む
+            <div style={styles.footer}>
+              <div style={styles.stats}>
+                <div style={styles.likeButtonContainer} onClick={(e) => e.preventDefault()}>
+                  <LikeButton
+                    postId={updatedPost.id}
+                    likes={updatedPost.likes}
+                    currentUser={currentUser}
+                    onUpdate={handleLikeUpdate}
+                  />
+                </div>
+                <div style={styles.commentCount}>
+                  <span style={styles.icon}>💬</span>
+                  {updatedPost.comments_count || updatedPost.comments?.length || 0}
+                </div>
+              </div>
+              
+              <div style={styles.readMore}>
+                続きを読む
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 
