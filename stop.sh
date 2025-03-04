@@ -9,13 +9,9 @@ NC='\033[0m' # No Color
 echo -e "${YELLOW}ConnectHub社内報システム停止スクリプト${NC}"
 echo "----------------------------------------"
 
-# コンテナを停止
-echo -e "${YELLOW}コンテナを停止しています...${NC}"
-docker stop connect-hub-mysql connect-hub-backend connect-hub-frontend
-
-# コンテナを削除
-echo -e "${YELLOW}コンテナを削除しています...${NC}"
-docker rm connect-hub-mysql connect-hub-backend connect-hub-frontend
+# Docker Composeを使用してコンテナを停止・削除
+echo -e "${YELLOW}コンテナを停止・削除しています...${NC}"
+docker-compose down
 
 echo -e "${GREEN}システムの停止が完了しました${NC}"
 echo "----------------------------------------"
