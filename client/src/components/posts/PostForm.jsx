@@ -60,11 +60,13 @@ const PostForm = ({ initialValues = {}, onSubmit = () => {}, onCancel = () => {}
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // 実際のAPIを使用する場合
-        // const response = await axios.get('/api/categories');
-        // setCategories(response.data);
-
-        // モックデータ
+        // APIからカテゴリを取得
+        const response = await axios.get('/api/categories');
+        setCategories(response.data || []);
+      } catch (err) {
+        console.error('カテゴリの取得に失敗:', err);
+        
+        // エラー時はモックデータを使用
         const mockCategories = [
           { id: 1, name: 'お知らせ', description: '会社からの公式なお知らせや通知を掲載します', is_active: true },
           { id: 2, name: 'プロジェクト', description: '社内の各種プロジェクトに関する情報を共有します', is_active: true },
@@ -80,8 +82,6 @@ const PostForm = ({ initialValues = {}, onSubmit = () => {}, onCancel = () => {}
           { id: 12, name: 'IT部', description: 'IT部からの情報発信です', is_active: true }
         ];
         setCategories(mockCategories);
-      } catch (err) {
-        console.error('カテゴリの取得に失敗:', err);
       }
     };
 
@@ -141,17 +141,17 @@ const PostForm = ({ initialValues = {}, onSubmit = () => {}, onCancel = () => {}
       return;
     }
     
-    // 実際の実装では、ここでheaderImageFileをアップロードして
-    // 本番環境のURLを取得する処理を追加します
-    // 簡略化のため、今回はそのままheaderImageを使用します
-    
-    onSubmit({
+    // 投稿データを作成して送信
+    const postData = {
       title,
       content,
       headerImage,
+      headerImageFile, // ファイルオブジェクトも送信
       categories: selectedCategories,
       isPinned
-    });
+    };
+    
+    onSubmit(postData);
   };
 
   // Quillエディタの設定
