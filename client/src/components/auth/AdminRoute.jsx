@@ -3,22 +3,24 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const AdminRoute = () => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
-
-  // 認証状態の読み込み中は何も表示しない
+  const { currentUser, loading } = useAuth();
+  
+  // 認証情報のロード中は何も表示しない
   if (loading) {
-    return <div>Loading...</div>;
+    return null;
   }
-
-  // 認証されていないか管理者でない場合はホームページにリダイレクト
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+  
+  // ログインしていない場合はログインページにリダイレクト
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
   }
-
-  if (!isAdmin) {
-    return <Navigate to="/" />;
+  
+  // 管理者でない場合はホームページにリダイレクト
+  if (currentUser.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
-
+  
+  // 管理者の場合は子ルートを表示
   return <Outlet />;
 };
 
