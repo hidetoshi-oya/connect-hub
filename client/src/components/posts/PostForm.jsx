@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { useDropzone } from 'react-dropzone';
 import styles from './PostForm.module.css';
 
 const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false, isEdit = false }) => {
@@ -9,12 +12,14 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
   const [title, setTitle] = useState(initialValues.title || '');
   const [content, setContent] = useState(initialValues.content || '');
   const [headerImage, setHeaderImage] = useState(initialValues.headerImage || '');
+  const [headerImageFile, setHeaderImageFile] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState(initialValues.categories || []);
   const [isPinned, setIsPinned] = useState(initialValues.isPinned || false);
   const [categories, setCategories] = useState([]);
   const [errors, setErrors] = useState({});
   const [showImagePreview, setShowImagePreview] = useState(!!initialValues.headerImage);
-  const [isRichEditor, setIsRichEditor] = useState(false);
+  const [isRichEditor, setIsRichEditor] = useState(true); // デフォルトでリッチエディタを有効に
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   
   // サンプル画像URL一覧
   const sampleImages = [
@@ -25,6 +30,32 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
     'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1504198453758-3fab425caefa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   ];
+
+  // ヘッダー画像ドロップゾーン処理
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles && acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      if (file.type.startsWith('image/')) {
+        // 画像ファイルをプレビュー用にURLに変換
+        const imageUrl = URL.createObjectURL(file);
+        setHeaderImage(imageUrl);
+        setHeaderImageFile(file);
+        setShowImagePreview(true);
+      }
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': []
+    },
+    multiple: false
+  });
+
+  useEffect(() => {
+    setIsDraggingOver(isDragActive);
+  }, [isDragActive]);
   
   useEffect(() => {
     const fetchCategories = async () => {
@@ -67,7 +98,19 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
 
   const handleSelectSampleImage = (imageUrl) => {
     setHeaderImage(imageUrl);
+    setHeaderImageFile(null); // サンプル画像を選んだ場合、アップロードファイルをクリア
     setShowImagePreview(true);
+  };
+
+  // ファイル選択ダイアログを開く
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const imageUrl = URL.createObjectURL(file);
+      setHeaderImage(imageUrl);
+      setHeaderImageFile(file);
+      setShowImagePreview(true);
+    }
   };
   
   const validateForm = () => {
@@ -98,6 +141,10 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
       return;
     }
     
+    // 実際の実装では、ここでheaderImageFileをアップロードして
+    // 本番環境のURLを取得する処理を追加します
+    // 簡略化のため、今回はそのままheaderImageを使用します
+    
     onSubmit({
       title,
       content,
@@ -107,70 +154,23 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
     });
   };
 
-  // リッチテキストの装飾ボタン
-  const formatButtons = [
-    { label: 'B', style: 'font-weight: bold;', format: '**', tooltip: '太字' },
-    { label: 'I', style: 'font-style: italic;', format: '*', tooltip: 'イタリック' },
-    { label: 'U', style: 'text-decoration: underline;', format: '__', tooltip: '下線' },
-    { label: 'H2', style: 'font-size: 1.5em;', format: '## ', tooltip: '見出し2' },
-    { label: 'H3', style: 'font-size: 1.25em;', format: '### ', tooltip: '見出し3' },
-    { label: 'リスト', style: '', format: '- ', tooltip: 'リスト' },
-    { label: '画像', style: '', format: '![画像の説明](', tooltip: '画像を挿入（URLが必要）', postfix: ')' }
-  ];
-
-  const handleFormat = (format, postfix = '') => {
-    const textarea = document.getElementById('content');
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end);
-    
-    let newContent;
-    if (selectedText) {
-      // テキストが選択されている場合
-      if (format === '- ') {
-        // リストの場合は各行の先頭に追加
-        const lines = selectedText.split('\n');
-        const formattedLines = lines.map(line => `${format}${line}`);
-        newContent = content.substring(0, start) + formattedLines.join('\n') + content.substring(end);
-      } else if (format === '![画像の説明](') {
-        // 画像の場合はURLとして扱う
-        newContent = content.substring(0, start) + format + selectedText + postfix + content.substring(end);
-      } else if (format === '## ' || format === '### ') {
-        // 見出しの場合は行の先頭に追加
-        newContent = content.substring(0, start) + format + selectedText + content.substring(end);
-      } else {
-        // それ以外の装飾
-        newContent = content.substring(0, start) + format + selectedText + format + content.substring(end);
-      }
-    } else {
-      // テキストが選択されていない場合
-      if (format === '![画像の説明](') {
-        const imageUrl = prompt('画像のURLを入力してください');
-        if (imageUrl) {
-          newContent = content.substring(0, start) + format + imageUrl + postfix + content.substring(end);
-        } else {
-          return; // キャンセルされた場合は何もしない
-        }
-      } else {
-        newContent = content.substring(0, start) + format + content.substring(end);
-      }
-    }
-    
-    setContent(newContent);
-    
-    // フォーカスを戻す
-    setTimeout(() => {
-      textarea.focus();
-      if (format === '![画像の説明](' && postfix === ')') {
-        // 画像の場合、URLの後にカーソルを移動
-        textarea.setSelectionRange(start + format.length, start + format.length);
-      } else {
-        // 通常の場合、選択範囲の後ろにカーソルを移動
-        const newCursorPos = start + format.length;
-        textarea.setSelectionRange(newCursorPos, newCursorPos);
-      }
-    }, 0);
+  // Quillエディタの設定
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{'list': 'ordered'}, {'list': 'bullet'}],
+      ['link', 'image'],
+      ['clean']
+    ],
   };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link', 'image'
+  ];
   
   return (
     <form onSubmit={handleSubmit}>
@@ -189,19 +189,37 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.formLabel} htmlFor="headerImage">ヘッダー画像URL</label>
-        <input
-          id="headerImage"
-          type="text"
-          value={headerImage}
-          onChange={(e) => {
-            setHeaderImage(e.target.value);
-            setShowImagePreview(!!e.target.value);
-          }}
-          className={styles.formControl}
-          placeholder="画像のURLを入力（任意）"
-          disabled={isSubmitting}
-        />
+        <label className={styles.formLabel}>ヘッダー画像</label>
+        
+        {/* ドラッグ&ドロップエリア */}
+        <div 
+          {...getRootProps()} 
+          className={`${styles.dropzone} ${isDraggingOver ? styles.dragActive : ''}`}
+        >
+          <input {...getInputProps()} />
+          {isDraggingOver ? (
+            <p>画像をドロップしてください</p>
+          ) : (
+            <div className={styles.dropzoneContent}>
+              <p>画像をドラッグ&ドロップするか、クリックして選択してください</p>
+              <button 
+                type="button" 
+                className={styles.browseButton}
+                onClick={(e) => e.stopPropagation()} // ドロップゾーンのクリックイベントを阻止
+              >
+                ファイルを選択
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className={styles.fileInput} 
+                  onChange={handleFileSelect}
+                  onClick={(e) => e.stopPropagation()} // ドロップゾーンのクリックイベントを阻止
+                />
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className={styles.sampleImagesContainer}>
           <p className={styles.sampleImagesLabel}>サンプル画像:</p>
           <div className={styles.sampleImageGrid}>
@@ -216,9 +234,10 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
             ))}
           </div>
         </div>
+        
         {showImagePreview && headerImage && (
           <div className={styles.imagePreviewContainer}>
-            <p>画像プレビュー:</p>
+            <p>ヘッダー画像プレビュー:</p>
             <img 
               src={headerImage} 
               alt="ヘッダープレビュー" 
@@ -230,6 +249,7 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
               className={styles.removeImageButton}
               onClick={() => {
                 setHeaderImage('');
+                setHeaderImageFile(null);
                 setShowImagePreview(false);
               }}
             >
@@ -252,79 +272,31 @@ const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false
           </label>
         </div>
 
-        {isRichEditor && (
-          <div className={styles.formatToolbar}>
-            {formatButtons.map((button, index) => (
-              <button
-                key={index}
-                type="button"
-                className={styles.formatButton}
-                style={{ ...button.style && { fontStyle: button.style } }}
-                onClick={() => handleFormat(button.format, button.postfix)}
-                title={button.tooltip}
-              >
-                {button.label}
-              </button>
-            ))}
+        {isRichEditor ? (
+          <div className={styles.quillWrapper}>
+            <ReactQuill
+              theme="snow"
+              value={content}
+              onChange={setContent}
+              modules={modules}
+              formats={formats}
+              placeholder="投稿の内容"
+              className={styles.quillEditor}
+              readOnly={isSubmitting}
+            />
           </div>
+        ) : (
+          <textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className={`${styles.formControl} ${styles.textArea}`}
+            placeholder="投稿の内容"
+            rows="10"
+            disabled={isSubmitting}
+          ></textarea>
         )}
-        <textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className={`${styles.formControl} ${styles.textArea}`}
-          placeholder="投稿の内容"
-          rows="10"
-          disabled={isSubmitting}
-        ></textarea>
         {errors.content && <div className={styles.error}>{errors.content}</div>}
-
-        {content && isRichEditor && (
-          <div className={styles.previewContainer}>
-            <h4>プレビュー:</h4>
-            <div className={styles.contentPreview}>
-              {content.split('\n').map((line, i) => {
-                // ヘッダーの処理
-                if (line.startsWith('## ')) {
-                  return <h2 key={i}>{line.replace('## ', '')}</h2>;
-                }
-                if (line.startsWith('### ')) {
-                  return <h3 key={i}>{line.replace('### ', '')}</h3>;
-                }
-                
-                // リストの処理
-                if (line.startsWith('- ')) {
-                  return <li key={i}>{line.replace('- ', '')}</li>;
-                }
-                
-                // 画像の処理
-                const imgRegex = /!\[([^\]]*)\]\(([^)]*)\)/g;
-                let imgMatch;
-                let processedLine = line;
-                
-                while ((imgMatch = imgRegex.exec(line)) !== null) {
-                  const [fullMatch, alt, src] = imgMatch;
-                  processedLine = processedLine.replace(
-                    fullMatch,
-                    `<img src="${src}" alt="${alt}" style="max-width: 100%;" />`
-                  );
-                }
-                
-                // 太字、イタリック、下線の処理
-                let formattedLine = processedLine
-                  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                  .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                  .replace(/__([^_]+)__/g, '<u>$1</u>');
-                
-                return imgRegex.test(line) ? (
-                  <div key={i} dangerouslySetInnerHTML={{ __html: formattedLine }} />
-                ) : (
-                  <p key={i} dangerouslySetInnerHTML={{ __html: formattedLine }} />
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
       
       <div className={styles.formGroup}>
