@@ -10,7 +10,9 @@ const styles = {
     borderRadius: '8px',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+    display: 'flex',
     overflow: 'hidden',
+    marginBottom: '1rem',
   },
   cardHover: {
     transform: 'translateY(-3px)',
@@ -19,27 +21,42 @@ const styles = {
   pinnedCard: {
     borderLeft: '4px solid #f0ad4e',
   },
+  imageContainer: {
+    flex: '0 0 200px',
+    height: '180px',
+  },
   headerImage: {
     width: '100%',
-    height: '180px',
+    height: '100%',
     objectFit: 'cover',
-    borderTopLeftRadius: '8px',
-    borderTopRightRadius: '8px',
+  },
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    backgroundColor: '#e9ecef',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#6c757d',
+    fontSize: '0.9rem',
   },
   contentWrapper: {
+    flex: '1',
     padding: '1.5rem',
-  },
-  header: {
     display: 'flex',
+    flexDirection: 'column',
     justifyContent: 'space-between',
-    marginBottom: '1rem',
   },
   title: {
     fontSize: '1.25rem',
     fontWeight: 'bold',
     marginTop: 0,
-    marginBottom: '0.5rem',
+    marginBottom: '0.75rem',
     color: '#212529',
+  },
+  metaContainer: {
+    marginBottom: 'auto',
   },
   meta: {
     display: 'flex',
@@ -47,6 +64,7 @@ const styles = {
     color: '#6c757d',
     fontSize: '0.9rem',
     flexWrap: 'wrap',
+    marginBottom: '0.5rem',
   },
   author: {
     display: 'flex',
@@ -65,7 +83,6 @@ const styles = {
   categories: {
     display: 'flex',
     gap: '0.5rem',
-    marginTop: '0.5rem',
     flexWrap: 'wrap',
   },
   category: {
@@ -74,15 +91,6 @@ const styles = {
     padding: '0.25rem 0.5rem',
     borderRadius: '4px',
     fontSize: '0.8rem',
-  },
-  content: {
-    marginBottom: '1rem',
-    color: '#4a5568',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    display: '-webkit-box',
-    WebkitLineClamp: 3,
-    WebkitBoxOrient: 'vertical',
   },
   footer: {
     display: 'flex',
@@ -112,6 +120,8 @@ const styles = {
   },
   link: {
     textDecoration: 'none',
+    display: 'block',
+    width: '100%',
   },
   pinnedIndicator: {
     display: 'flex',
@@ -155,13 +165,19 @@ const PostCard = ({ post, currentUser }) => {
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >
-        {post.headerImage && (
-          <img
-            src={post.headerImage}
-            alt={post.title}
-            style={styles.headerImage}
-          />
-        )}
+        <div style={styles.imageContainer}>
+          {post.headerImage ? (
+            <img
+              src={post.headerImage}
+              alt={post.title}
+              style={styles.headerImage}
+            />
+          ) : (
+            <div style={styles.placeholderImage}>
+              No Image
+            </div>
+          )}
+        </div>
         
         <div style={styles.contentWrapper}>
           {post.isPinned && (
@@ -171,33 +187,29 @@ const PostCard = ({ post, currentUser }) => {
             </div>
           )}
           
-          <div style={styles.header}>
-            <h3 style={styles.title}>{post.title}</h3>
-          </div>
+          <h3 style={styles.title}>{post.title}</h3>
           
-          <div style={styles.meta}>
-            <div style={styles.author}>
-              <img
-                src={post.author.avatar_url || '/default-avatar.png'}
-                alt={post.author.name}
-                style={styles.authorAvatar}
-              />
-              <span>{post.author.name}</span>
+          <div style={styles.metaContainer}>
+            <div style={styles.meta}>
+              <div style={styles.author}>
+                <img
+                  src={post.author.avatar_url || '/default-avatar.png'}
+                  alt={post.author.name}
+                  style={styles.authorAvatar}
+                />
+                <span>{post.author.name}</span>
+              </div>
+              <div style={styles.date}>{formattedDate}</div>
+              <div style={styles.department}>{post.author.department}</div>
             </div>
-            <div style={styles.date}>{formattedDate}</div>
-            <div style={styles.department}>{post.author.department}</div>
-          </div>
-          
-          <div style={styles.categories}>
-            {post.categories.map((category, index) => (
-              <span key={index} style={styles.category}>
-                {category.name}
-              </span>
-            ))}
-          </div>
-          
-          <div style={styles.content}>
-            {truncateContent(post.content)}
+            
+            <div style={styles.categories}>
+              {post.categories.map((category, index) => (
+                <span key={index} style={styles.category}>
+                  {category.name}
+                </span>
+              ))}
+            </div>
           </div>
           
           <div style={styles.footer}>
