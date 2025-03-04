@@ -128,12 +128,91 @@ const PostDetail = () => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/api/posts/${id}`);
-        setPost(response.data);
+        
+        // 実際のAPIを使用する場合
+        // const response = await axios.get(`/api/posts/${id}`);
+        // setPost(response.data);
+        
+        // モックデータ
+        const postId = parseInt(id);
+        
+        // モックデータの配列
+        const mockPosts = [
+          {
+            id: 1,
+            title: '新しい社内報システムのβ版がリリースされました！',
+            content: '長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。\n\n主な機能は以下の通りです：\n\n- 投稿機能：テキスト、画像、ファイル添付が可能な記事投稿\n- いいね機能：投稿へのリアクション機能\n- コメント機能：投稿へのコメント（自分のコメント削除可能）\n- カテゴリ機能：記事のカテゴリ分類と絞り込み表示\n- ピックアップ記事：重要な投稿を上部に固定表示\n\nご不明な点があればIT部までお問い合わせください。',
+            author: {
+              id: 1,
+              name: '管理者 太郎',
+              department: 'IT部',
+              avatar_url: '/avatars/admin.jpg'
+            },
+            categories: [{ name: 'お知らせ' }, { name: '社内システム' }],
+            isPinned: true,
+            created_at: new Date(),
+            likes: [{ user_id: 2 }, { user_id: 3 }],
+            comments: [
+              {
+                id: 1,
+                content: '待っていました！早速使ってみます。',
+                author: {
+                  id: 2,
+                  name: 'モデレータ 花子',
+                  department: '人事部',
+                  avatar_url: '/avatars/moderator.jpg'
+                },
+                created_at: new Date()
+              }
+            ]
+          },
+          {
+            id: 2,
+            title: '4月からの新プロジェクトメンバー募集',
+            content: '次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。\n\n【プロジェクト概要】\n・基幹システムリニューアル\n・開発期間：2023年4月〜2024年3月\n・使用技術：React, Node.js, MySQL\n\n【募集人数】\n・フロントエンド開発：2名\n・バックエンド開発：2名\n・インフラ担当：1名\n\n【応募方法】\n開発部の山田までメールにてご連絡ください。\n応募締切：3月20日',
+            author: {
+              id: 3,
+              name: '山田 太郎',
+              department: '開発部',
+              avatar_url: '/avatars/yamada.jpg'
+            },
+            categories: [{ name: 'プロジェクト' }, { name: '募集' }],
+            isPinned: false,
+            created_at: new Date(),
+            likes: [{ user_id: 1 }],
+            comments: []
+          },
+          {
+            id: 3,
+            title: '社内イベントのお知らせ：夏祭り',
+            content: '今年も社内夏祭りを開催します。皆様のご参加をお待ちしております。\n\n【開催日時】\n2023年7月15日（土）15:00〜20:00\n\n【場所】\n本社屋上ガーデン\n\n【内容】\n・バーベキュー\n・ビアガーデン\n・ゲーム大会\n・カラオケ大会\n\n【参加費】\n無料（ご家族の参加も歓迎します）\n\n【申し込み方法】\n人事部の花子までメールにてご連絡ください。\n申し込み締切：7月5日',
+            author: {
+              id: 2,
+              name: 'モデレータ 花子',
+              department: '人事部',
+              avatar_url: '/avatars/moderator.jpg'
+            },
+            categories: [{ name: 'イベント' }, { name: 'お知らせ' }],
+            isPinned: true,
+            created_at: new Date(),
+            likes: [{ user_id: 1 }, { user_id: 3 }],
+            comments: []
+          }
+        ];
+        
+        // IDに一致する投稿を検索
+        const matchingPost = mockPosts.find(post => post.id === postId);
+        
+        if (matchingPost) {
+          setPost(matchingPost);
+        } else {
+          setError('指定された投稿が見つかりません');
+        }
+        
+        setLoading(false);
       } catch (err) {
         console.error('投稿の取得に失敗しました', err);
         setError('投稿の取得に失敗しました。もう一度お試しください。');
-      } finally {
         setLoading(false);
       }
     };
@@ -191,6 +270,14 @@ const PostDetail = () => {
     });
   };
   
+  const handleDeleteComment = (commentId) => {
+    // コメントを削除
+    setPost({
+      ...post,
+      comments: post.comments.filter(comment => comment.id !== commentId)
+    });
+  };
+  
   if (loading) return <Loading />;
   
   if (error) {
@@ -235,16 +322,16 @@ const PostDetail = () => {
           </div>
           <div style={styles.categories}>
             {post.categories.map((category, index) => (
-              <span key={index} style={styles.category}>
+              <Link to={`/?category=${encodeURIComponent(category.name)}`} key={index} style={styles.category}>
                 {category.name}
-              </span>
+              </Link>
             ))}
           </div>
         </div>
       </div>
       
       <div style={styles.content}>
-        {post.content.split('\\n').map((line, index) => (
+        {post.content.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}
       </div>
@@ -283,7 +370,11 @@ const PostDetail = () => {
         )}
         
         {post.comments.length > 0 ? (
-          <CommentList comments={post.comments} currentUser={currentUser} />
+          <CommentList 
+            comments={post.comments} 
+            currentUser={currentUser} 
+            onDeleteComment={handleDeleteComment}
+          />
         ) : (
           <p style={styles.noCommentsText}>
             コメントはまだありません。最初のコメントを投稿しましょう。
