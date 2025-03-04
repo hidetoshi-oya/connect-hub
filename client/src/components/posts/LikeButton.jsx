@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 // スタイル - 将来的にはモジュールCSSを作成
 const styles = {
@@ -34,15 +35,71 @@ const styles = {
     fontSize: '0.9rem',
     color: '#6c757d',
   },
+  processingOverlay: {
+    opacity: 0.7,
+    pointerEvents: 'none',
+  }
 };
 
-const LikeButton = ({ likes, currentUser, onLike }) => {
+const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const likeCount = likes.length;
   const isLiked = currentUser && likes.some(like => like.user_id === currentUser.id);
   
-  const handleClick = () => {
-    if (currentUser) {
-      onLike();
+  const handleClick = async (e) => {
+    // イベントの伝播を停止してリンクのクリックを防止
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!currentUser || isProcessing) return;
+    
+    try {
+      setIsProcessing(true);
+      
+      // APIを呼び出していいねを切り替える
+      const response = await axios.post(`/api/posts/${postId}/like`, {}, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      // いいねの更新完了
+      setIsProcessing(false);
+      
+      // いいねの状態に基づいて更新
+      if (response.data.liked) {
+        // いいねの追加
+        if (onUpdate) {
+          onUpdate({
+            likes: [...likes, { user_id: currentUser.id }]
+          });
+        }
+      } else {
+        // いいねの削除
+        if (onUpdate) {
+          onUpdate({
+            likes: likes.filter(like => like.user_id !== currentUser.id)
+          });
+        }
+      }
+    } catch (err) {
+      console.error('いいねの処理に失敗しました:', err);
+      setIsProcessing(false);
+      
+      // フォールバック（オフライン対応）
+      if (onUpdate) {
+        if (isLiked) {
+          // いいねを削除
+          onUpdate({
+            likes: likes.filter(like => like.user_id !== currentUser.id)
+          });
+        } else {
+          // いいねを追加
+          onUpdate({
+            likes: [...likes, { user_id: currentUser.id }]
+          });
+        }
+      }
     }
   };
   
@@ -52,7 +109,8 @@ const LikeButton = ({ likes, currentUser, onLike }) => {
         <button
           style={{
             ...styles.button,
-            ...(isLiked ? styles.buttonActive : {})
+            ...(isLiked ? styles.buttonActive : {}),
+            ...(isProcessing ? styles.processingOverlay : {})
           }}
           onClick={handleClick}
         >
