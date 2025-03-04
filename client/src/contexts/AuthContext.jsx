@@ -23,63 +23,119 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && storedToken) {
       setCurrentUser(JSON.parse(storedUser));
       axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      
+      // トークンの有効性を確認（任意）
+      verifyToken(storedToken);
     }
     
     setLoading(false);
   }, []);
+  
+  // トークンの有効性を確認
+  const verifyToken = async (token) => {
+    try {
+      // サーバーAPIでトークンの有効性を確認
+      await axios.get('/api/auth/verify', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+    } catch (err) {
+      // トークンが無効な場合はログアウト
+      console.error('トークンが無効です:', err);
+      logout();
+    }
+  };
   
   // ログイン処理
   const login = async (email, password) => {
     try {
       setError('');
       
-      // 実際はAPIを呼び出してログイン認証を行う
-      // const response = await axios.post('/api/auth/login', { email, password });
+      // APIを呼び出してログイン認証を行う
+      const response = await axios.post('/api/auth/login', { 
+        email, 
+        password 
+      });
       
-      // 開発用モックデータ
-      let mockResponse;
+      // レスポンスからトークンとユーザー情報を取得
+      const { token, user } = response.data;
       
-      if (email === 'admin@example.com' && password === 'password') {
-        mockResponse = {
-          token: 'test_token_for_admin',
-          user: {
+      // トークンをヘッダーに設定
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // ユーザー情報をローカルストレージに保存
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // ユーザー情報を状態に設定
+      setCurrentUser(user);
+      
+      return user;
+    } catch (err) {
+      // APIエラーの処理
+      if (err.response) {
+        // サーバーからのエラーレスポンス
+        setError(err.response.data?.message || 'メールアドレスまたはパスワードが正しくありません');
+      } else if (err.request) {
+        // リクエストは送信されたがレスポンスが返ってこない
+        setError('サーバーに接続できませんでした。インターネット接続を確認してください。');
+      } else {
+        // リクエスト設定時に何らかのエラーが発生
+        setError('ログイン処理中にエラーが発生しました。');
+      }
+      
+      // 開発用モックデータ（サーバーAPI未実装時のフォールバック）
+      if (process.env.NODE_ENV === 'development') {
+        if (email === 'admin@example.com' && password === 'password') {
+          const mockUser = {
             id: 1,
             name: '管理者 太郎',
             email: 'admin@example.com',
             department: 'IT部',
             role: 'admin',
             avatar_url: '/avatars/admin.jpg'
-          }
-        };
-      } else if (email === 'yamada@example.com' && password === 'password') {
-        mockResponse = {
-          token: 'test_token_for_user',
-          user: {
+          };
+          
+          const mockToken = 'test_token_for_admin';
+          
+          // トークンをヘッダーに設定
+          axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+          
+          // ユーザー情報をローカルストレージに保存
+          localStorage.setItem('token', mockToken);
+          localStorage.setItem('user', JSON.stringify(mockUser));
+          
+          // ユーザー情報を状態に設定
+          setCurrentUser(mockUser);
+          
+          return mockUser;
+        } else if (email === 'yamada@example.com' && password === 'password') {
+          const mockUser = {
             id: 3,
             name: '山田 太郎',
             email: 'yamada@example.com',
             department: '営業部',
             role: 'contributor',
             avatar_url: '/avatars/yamada.jpg'
-          }
-        };
-      } else {
-        throw new Error('メールアドレスまたはパスワードが正しくありません');
+          };
+          
+          const mockToken = 'test_token_for_user';
+          
+          // トークンをヘッダーに設定
+          axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+          
+          // ユーザー情報をローカルストレージに保存
+          localStorage.setItem('token', mockToken);
+          localStorage.setItem('user', JSON.stringify(mockUser));
+          
+          // ユーザー情報を状態に設定
+          setCurrentUser(mockUser);
+          
+          return mockUser;
+        }
       }
       
-      // トークンをヘッダーに設定
-      axios.defaults.headers.common['Authorization'] = `Bearer ${mockResponse.token}`;
-      
-      // ユーザー情報をローカルストレージに保存
-      localStorage.setItem('token', mockResponse.token);
-      localStorage.setItem('user', JSON.stringify(mockResponse.user));
-      
-      // ユーザー情報を状態に設定
-      setCurrentUser(mockResponse.user);
-      
-      return mockResponse.user;
-    } catch (err) {
-      setError(err.message || 'ログインに失敗しました');
       throw err;
     }
   };
@@ -89,35 +145,62 @@ export const AuthProvider = ({ children }) => {
     try {
       setError('');
       
-      // 実際はAPIを呼び出して新規登録を行う
-      // const response = await axios.post('/api/auth/register', userData);
+      // APIを呼び出して新規登録を行う
+      const response = await axios.post('/api/auth/register', userData);
       
-      // 開発用モックデータ
-      const mockResponse = {
-        token: 'test_token_for_new_user',
-        user: {
+      // レスポンスからトークンとユーザー情報を取得
+      const { token, user } = response.data;
+      
+      // トークンをヘッダーに設定
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // ユーザー情報をローカルストレージに保存
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      // ユーザー情報を状態に設定
+      setCurrentUser(user);
+      
+      return user;
+    } catch (err) {
+      // APIエラーの処理
+      if (err.response) {
+        // サーバーからのエラーレスポンス
+        setError(err.response.data?.message || '新規登録に失敗しました');
+      } else if (err.request) {
+        // リクエストは送信されたがレスポンスが返ってこない
+        setError('サーバーに接続できませんでした。インターネット接続を確認してください。');
+      } else {
+        // リクエスト設定時に何らかのエラーが発生
+        setError('新規登録処理中にエラーが発生しました。');
+      }
+      
+      // 開発用モックデータ（サーバーAPI未実装時のフォールバック）
+      if (process.env.NODE_ENV === 'development') {
+        const mockUser = {
           id: 10,
           name: userData.name,
           email: userData.email,
           department: userData.department,
           role: 'contributor',
           avatar_url: '/avatars/default.jpg'
-        }
-      };
+        };
+        
+        const mockToken = 'test_token_for_new_user';
+        
+        // トークンをヘッダーに設定
+        axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+        
+        // ユーザー情報をローカルストレージに保存
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        // ユーザー情報を状態に設定
+        setCurrentUser(mockUser);
+        
+        return mockUser;
+      }
       
-      // トークンをヘッダーに設定
-      axios.defaults.headers.common['Authorization'] = `Bearer ${mockResponse.token}`;
-      
-      // ユーザー情報をローカルストレージに保存
-      localStorage.setItem('token', mockResponse.token);
-      localStorage.setItem('user', JSON.stringify(mockResponse.user));
-      
-      // ユーザー情報を状態に設定
-      setCurrentUser(mockResponse.user);
-      
-      return mockResponse.user;
-    } catch (err) {
-      setError(err.message || '新規登録に失敗しました');
       throw err;
     }
   };
