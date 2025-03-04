@@ -6,7 +6,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useDropzone } from 'react-dropzone';
 import styles from './PostForm.module.css';
 
-const PostForm = ({ initialValues = {}, onSubmit, onCancel, isSubmitting = false, isEdit = false }) => {
+const PostForm = ({ initialValues = {}, onSubmit = () => {}, onCancel = () => {}, isSubmitting = false, isEdit = false }) => {
   const { currentUser } = useAuth();
   
   const [title, setTitle] = useState(initialValues.title || '');
