@@ -9,8 +9,8 @@ const styles = {
     backgroundColor: 'white',
     borderRadius: '8px',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-    padding: '1.5rem',
     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+    overflow: 'hidden',
   },
   cardHover: {
     transform: 'translateY(-3px)',
@@ -18,6 +18,16 @@ const styles = {
   },
   pinnedCard: {
     borderLeft: '4px solid #f0ad4e',
+  },
+  headerImage: {
+    width: '100%',
+    height: '180px',
+    objectFit: 'cover',
+    borderTopLeftRadius: '8px',
+    borderTopRightRadius: '8px',
+  },
+  contentWrapper: {
+    padding: '1.5rem',
   },
   header: {
     display: 'flex',
@@ -119,8 +129,19 @@ const PostCard = ({ post, currentUser }) => {
   
   const truncateContent = (text, maxLength = 150) => {
     if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '...';
+
+    // Markdownの記法を取り除く（簡易的な実装）
+    let plainText = text
+      .replace(/!\[.*?\]\(.*?\)/g, '[画像]') // 画像を[画像]テキストに置換
+      .replace(/\*\*(.*?)\*\*/g, '$1')      // 太字を通常テキストに変換
+      .replace(/\*(.*?)\*/g, '$1')          // イタリックを通常テキストに変換
+      .replace(/__(.*?)__/g, '$1')          // 下線を通常テキストに変換
+      .replace(/^##\s+(.*)$/gm, '$1')       // 見出し2を通常テキストに変換
+      .replace(/^###\s+(.*)$/gm, '$1')      // 見出し3を通常テキストに変換
+      .replace(/^-\s+(.*)$/gm, '$1');       // リストを通常テキストに変換
+
+    if (plainText.length <= maxLength) return plainText;
+    return plainText.slice(0, maxLength) + '...';
   };
   
   return (
@@ -134,56 +155,66 @@ const PostCard = ({ post, currentUser }) => {
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
       >
-        {post.isPinned && (
-          <div style={styles.pinnedIndicator}>
-            <span style={{ marginRight: '0.25rem' }}>📌</span>
-            固定投稿
-          </div>
+        {post.headerImage && (
+          <img
+            src={post.headerImage}
+            alt={post.title}
+            style={styles.headerImage}
+          />
         )}
         
-        <div style={styles.header}>
-          <h3 style={styles.title}>{post.title}</h3>
-        </div>
-        
-        <div style={styles.meta}>
-          <div style={styles.author}>
-            <img
-              src={post.author.avatar_url || '/default-avatar.png'}
-              alt={post.author.name}
-              style={styles.authorAvatar}
-            />
-            <span>{post.author.name}</span>
-          </div>
-          <div style={styles.date}>{formattedDate}</div>
-          <div style={styles.department}>{post.author.department}</div>
-        </div>
-        
-        <div style={styles.categories}>
-          {post.categories.map((category, index) => (
-            <span key={index} style={styles.category}>
-              {category.name}
-            </span>
-          ))}
-        </div>
-        
-        <div style={styles.content}>
-          {truncateContent(post.content)}
-        </div>
-        
-        <div style={styles.footer}>
-          <div style={styles.stats}>
-            <div style={styles.stat}>
-              <span style={styles.icon}>👍</span>
-              {post.likes.length}
+        <div style={styles.contentWrapper}>
+          {post.isPinned && (
+            <div style={styles.pinnedIndicator}>
+              <span style={{ marginRight: '0.25rem' }}>📌</span>
+              固定投稿
             </div>
-            <div style={styles.stat}>
-              <span style={styles.icon}>💬</span>
-              {post.comments.length}
-            </div>
+          )}
+          
+          <div style={styles.header}>
+            <h3 style={styles.title}>{post.title}</h3>
           </div>
           
-          <div style={styles.readMore}>
-            続きを読む
+          <div style={styles.meta}>
+            <div style={styles.author}>
+              <img
+                src={post.author.avatar_url || '/default-avatar.png'}
+                alt={post.author.name}
+                style={styles.authorAvatar}
+              />
+              <span>{post.author.name}</span>
+            </div>
+            <div style={styles.date}>{formattedDate}</div>
+            <div style={styles.department}>{post.author.department}</div>
+          </div>
+          
+          <div style={styles.categories}>
+            {post.categories.map((category, index) => (
+              <span key={index} style={styles.category}>
+                {category.name}
+              </span>
+            ))}
+          </div>
+          
+          <div style={styles.content}>
+            {truncateContent(post.content)}
+          </div>
+          
+          <div style={styles.footer}>
+            <div style={styles.stats}>
+              <div style={styles.stat}>
+                <span style={styles.icon}>👍</span>
+                {post.likes.length}
+              </div>
+              <div style={styles.stat}>
+                <span style={styles.icon}>💬</span>
+                {post.comments.length}
+              </div>
+            </div>
+            
+            <div style={styles.readMore}>
+              続きを読む
+            </div>
           </div>
         </div>
       </div>
