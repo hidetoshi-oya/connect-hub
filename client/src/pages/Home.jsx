@@ -97,6 +97,9 @@ const Home = () => {
         console.error('投稿の取得に失敗:', err);
         setError('投稿の読み込みに失敗しました。後でもう一度お試しください。');
         
+        // クエリパラメータを再取得（エラー処理内でも利用するため）
+        const { category, search } = getQueryParams();
+        
         // エラー時はモックデータを使用
         const mockPosts = [
           {
