@@ -23,12 +23,15 @@ const styles = {
   },
   imageContainer: {
     flex: '0 0 200px',
-    height: '180px',
+    height: '100%', // 高さを100%に変更して親要素に合わせる
+    display: 'flex', // flexboxを追加
+    alignItems: 'stretch', // 子要素を縦方向に引き伸ばす
   },
   headerImage: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
+    display: 'block', // 画像の下部の隙間を除去
   },
   placeholderImage: {
     width: '100%',
