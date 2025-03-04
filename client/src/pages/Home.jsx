@@ -102,7 +102,7 @@ const Home = () => {
           {
             id: 1,
             title: '新しい社内報システムのβ版がリリースされました！',
-            content: '## ConnectHubのリリースについて\n\n長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。\n\n主な機能は以下の通りです：\n\n- 投稿機能：テキスト、画像、ファイル添付が可能な記事投稿\n- いいね機能：投稿へのリアクション機能\n- コメント機能：投稿へのコメント（自分のコメント削除可能）\n- カテゴリ機能：記事のカテゴリ分類と絞り込み表示\n- ピックアップ記事：重要な投稿を上部に固定表示\n\n![システムイメージ](https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)\n\nご不明な点があればIT部までお問い合わせください。',
+            content: '## ConnectHubのリリースについて\\n\\n長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。\\n\\n主な機能は以下の通りです：\\n\\n- 投稿機能：テキスト、画像、ファイル添付が可能な記事投稿\\n- いいね機能：投稿へのリアクション機能\\n- コメント機能：投稿へのコメント（自分のコメント削除可能）\\n- カテゴリ機能：記事のカテゴリ分類と絞り込み表示\\n- ピックアップ記事：重要な投稿を上部に固定表示\\n\\n![システムイメージ](https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)\\n\\nご不明な点があればIT部までお問い合わせください。',
             headerImage: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
             author: {
               id: 1,
@@ -119,7 +119,7 @@ const Home = () => {
           {
             id: 2,
             title: '4月からの新プロジェクトメンバー募集',
-            content: '## 次期基幹システム開発プロジェクト\n\n次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。',
+            content: '## 次期基幹システム開発プロジェクト\\n\\n次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。',
             headerImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
             author: {
               id: 3,
@@ -136,19 +136,19 @@ const Home = () => {
         ];
         
         // クエリパラメータを取得
-        const queryParams = getQueryParams();
+        const { category, search } = getQueryParams();
         
         // カテゴリでフィルタリング
         let filteredPosts = [...mockPosts];
-        if (queryParams.category) {
+        if (category) {
           filteredPosts = filteredPosts.filter(post => 
-            post.categories.some(cat => cat.name === queryParams.category)
+            post.categories.some(cat => cat.name === category)
           );
         }
 
         // 検索でフィルタリング
-        if (queryParams.search) {
-          const searchLower = queryParams.search.toLowerCase();
+        if (search) {
+          const searchLower = search.toLowerCase();
           filteredPosts = filteredPosts.filter(post => 
             post.title.toLowerCase().includes(searchLower) || 
             post.content.toLowerCase().includes(searchLower)
