@@ -13,12 +13,13 @@ const CreatePost = () => {
 
   // 投稿送信処理
   const handleSubmit = async (postData) => {
+    // ヘッダー画像が File オブジェクトの場合はアップロード処理を行う
+    let headerImageUrl = postData.headerImage;
+    
     try {
       setIsSubmitting(true);
       setError('');
       
-      // ヘッダー画像が File オブジェクトの場合はアップロード処理を行う
-      let headerImageUrl = postData.headerImage;
       if (postData.headerImageFile) {
         const formData = new FormData();
         formData.append('file', postData.headerImageFile);
