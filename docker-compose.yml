@@ -19,6 +19,11 @@ services:
     networks:
       - connect-hub-network
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --host-cache-size=0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "connecthub_user", "--password=connecthub_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   
   # バックエンドサービス
   backend:
@@ -39,11 +44,11 @@ services:
       NPM_CONFIG_LOGLEVEL: verbose
     ports:
       - "8000:8000"
-    # ボリュームマウントを変更 - ホストのソースコードはマウントせず、ビルド時にコピーしたものを使用
     volumes:
       - backend_logs:/app/logs
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - connect-hub-network
   
@@ -59,7 +64,6 @@ services:
       REACT_APP_API_URL: http://localhost:8000/api
     ports:
       - "3000:3000"
-    # ボリュームマウントを変更 - ホストのソースコードはマウントせず、ビルド時にコピーしたものを使用
     volumes:
       - frontend_logs:/app/logs
     depends_on:
