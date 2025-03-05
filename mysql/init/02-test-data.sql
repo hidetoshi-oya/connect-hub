@@ -1,3 +1,8 @@
+-- 文字コード設定
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET SESSION collation_connection = utf8mb4_unicode_ci;
+
 -- テストデータの挿入
 USE connecthub;
 
