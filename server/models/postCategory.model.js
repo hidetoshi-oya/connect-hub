@@ -1,36 +1,26 @@
 module.exports = (sequelize, DataTypes) => {
   const PostCategory = sequelize.define("post_categories", {
-    id: {
+    post_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
-    },
-    postId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      field: 'post_id',
       references: {
         model: 'posts',
         key: 'id'
       }
     },
-    categoryId: {
+    category_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      primaryKey: true,
+      field: 'category_id',
       references: {
         model: 'categories',
         key: 'id'
       }
     }
   }, {
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    indexes: [
-      {
-        unique: true,
-        fields: ['postId', 'categoryId']
-      }
-    ]
+    timestamps: false,
+    tableName: 'post_categories'
   });
 
   return PostCategory;
