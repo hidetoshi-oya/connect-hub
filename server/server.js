@@ -56,23 +56,63 @@ app.get('/api', (req, res) => {
   res.json({ message: 'ConnectHub API is running!' });
 });
 
-// データベース同期
-db.sequelize.sync({ alter: true })
-  .then(() => {
-    console.log("データベース接続成功");
-    
-    // 初期データの作成（開発環境のみ）
-    if (process.env.NODE_ENV === 'development') {
-      require('./seeders')();
-    }
-  })
-  .catch(err => {
-    console.error("データベース接続エラー:", err);
-  });
-
 // サーバー起動
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Swagger documentation available at http://localhost:${PORT}/api-docs`);
+  
+  // データベース接続を試行
+  connectToDatabase();
+});
+
+// データベース接続関数
+async function connectToDatabase() {
+  const maxRetries = 10;
+  let retries = 0;
+  let connected = false;
+  
+  while (retries < maxRetries && !connected) {
+    try {
+      console.log(`データベース接続を試行中... (${retries + 1}/${maxRetries})`);
+      await db.sequelize.authenticate();
+      console.log("データベース接続に成功しました！");
+      connected = true;
+      
+      // データベース同期
+      await db.sequelize.sync({ alter: true });
+      console.log("データベースの同期が完了しました");
+      
+      // 初期データの作成（開発環境のみ）
+      if (process.env.NODE_ENV === 'development') {
+        require('./seeders')();
+      }
+    } catch (error) {
+      retries++;
+      console.error(`データベース接続に失敗しました (${retries}/${maxRetries}):`, error.message);
+      
+      if (retries >= maxRetries) {
+        console.error("最大再試行回数に達しました。データベース接続を確立できませんでした。");
+        console.error("サーバーを終了します...");
+        server.close(() => {
+          process.exit(1);
+        });
+        return;
+      }
+      
+      // 次の再試行までの待機時間を設定（指数バックオフ）
+      const waitTime = Math.min(1000 * Math.pow(1.5, retries), 30000);
+      console.log(`${waitTime / 1000}秒後に再試行します...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+  }
+}
+
+// プロセス終了ハンドリング
+process.on('SIGINT', () => {
+  console.log('サーバーをシャットダウンしています...');
+  server.close(() => {
+    console.log('サーバーが正常にシャットダウンされました');
+    process.exit(0);
+  });
 });
