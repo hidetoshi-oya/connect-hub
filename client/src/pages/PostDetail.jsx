@@ -12,7 +12,7 @@ import LikeButton from '../components/posts/LikeButton';
 import Loading from '../components/ui/Loading';
 
 // デフォルトのアバター画像
-const DEFAULT_AVATAR = 'https://via.placeholder.com/40?text=User';
+const DEFAULT_AVATAR = '/default-avatar.png';
 
 // スタイル
 const styles = {
