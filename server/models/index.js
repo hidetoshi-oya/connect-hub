@@ -8,15 +8,11 @@ const sequelize = new Sequelize(
   dbConfig.PASSWORD,
   {
     host: dbConfig.HOST,
+    port: dbConfig.PORT,
     dialect: dbConfig.dialect,
     operatorsAliases: 0,
-    pool: {
-      max: dbConfig.pool.max,
-      min: dbConfig.pool.min,
-      acquire: dbConfig.pool.acquire,
-      idle: dbConfig.pool.idle
-    },
-    logging: console.log // 開発中はSQLログを表示
+    pool: dbConfig.pool,
+    logging: dbConfig.logging
   }
 );
 
@@ -26,13 +22,13 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// モデルのインポート
+// モデルのインポート - 実際のファイル名に合わせて修正
 db.User = require('./user.model')(sequelize, DataTypes);
 db.Post = require('./post.model')(sequelize, DataTypes);
-db.Category = require('./category.model')(sequelize, DataTypes);
-db.Comment = require('./comment.model')(sequelize, DataTypes);
-db.Like = require('./like.model')(sequelize, DataTypes);
-db.PostCategory = require('./postCategory.model')(sequelize, DataTypes);
+db.Category = require('./Category')(sequelize, DataTypes);
+db.Comment = require('./Comment')(sequelize, DataTypes);
+db.Like = require('./Like')(sequelize, DataTypes);
+db.PostCategory = require('./PostCategory')(sequelize, DataTypes);
 
 // リレーションシップの設定
 // User - Post (1対多)
