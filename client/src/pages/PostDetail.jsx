@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import axios from 'axios';
+import api from '../services/api';
 
 // コンポーネント
 import CommentForm from '../components/comments/CommentForm';
@@ -148,11 +148,7 @@ const PostDetail = () => {
         setError('');
         
         // APIから投稿データを取得
-        const response = await axios.get(`/api/posts/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+        const response = await api.get(`/posts/${id}`);
         
         setPost(response.data);
         setLoading(false);
@@ -252,11 +248,7 @@ const PostDetail = () => {
     
     try {
       // APIを使って投稿を削除
-      await axios.delete(`/api/posts/${id}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await api.delete(`/posts/${id}`);
       
       // 削除成功後、ホームページにリダイレクト
       alert('投稿が削除されました');
@@ -272,12 +264,8 @@ const PostDetail = () => {
   const handleAddComment = async (commentContent) => {
     try {
       // APIを使ってコメントを追加
-      const response = await axios.post(`/api/posts/${id}/comments`, {
+      const response = await api.post(`/posts/${id}/comments`, {
         content: commentContent
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
       });
       
       // 新しいコメントを投稿に追加
@@ -312,11 +300,7 @@ const PostDetail = () => {
   const handleDeleteComment = async (commentId) => {
     try {
       // APIを使ってコメントを削除
-      await axios.delete(`/api/posts/${id}/comments/${commentId}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      await api.delete(`/posts/${id}/comments/${commentId}`);
       
       // コメントを削除
       setPost({
