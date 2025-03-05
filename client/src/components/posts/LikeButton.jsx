@@ -8,24 +8,23 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
   },
-  likeText: {
+  likeButton: {
     display: 'flex',
     alignItems: 'center',
     cursor: 'pointer',
-    transition: 'color 0.2s ease-in-out',
-    color: '#6c757d',
+    padding: '4px 8px',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s ease-in-out',
   },
-  likeTextActive: {
-    color: '#0d6efd',
-    fontWeight: 'bold',
+  likeButtonActive: {
+    backgroundColor: '#e6f3ff', // 薄い水色の背景
   },
   icon: {
-    marginRight: '0.5rem',
+    marginRight: '0.25rem',
     fontSize: '1rem',
   },
   likeCount: {
     fontWeight: 'bold',
-    marginLeft: '0.25rem',
   },
   loginPrompt: {
     marginLeft: '0.5rem',
@@ -36,12 +35,6 @@ const styles = {
     opacity: 0.7,
     pointerEvents: 'none',
   },
-  likeDisplay: {
-    fontSize: '0.9rem',
-    display: 'flex',
-    alignItems: 'center',
-    marginRight: '0.5rem',
-  }
 };
 
 const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
@@ -104,25 +97,28 @@ const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
   
   return (
     <div style={styles.container} onClick={(e) => e.stopPropagation()}>
-      <div style={styles.likeDisplay}>
-        <span style={styles.icon}>👍</span>
-        <span style={styles.likeCount}>{likeCount}</span>
-      </div>
-      
       {currentUser ? (
         <div
           style={{
-            ...styles.likeText,
-            ...(isLiked ? styles.likeTextActive : {}),
+            ...styles.likeButton,
+            ...(isLiked ? styles.likeButtonActive : {}),
             ...(isProcessing ? styles.processingOverlay : {})
           }}
           onClick={handleClick}
+          title={isLiked ? 'いいねを取り消す' : 'いいねする'}
         >
-          {isLiked ? 'いいね済み' : 'いいねする'}
+          <span style={styles.icon}>👍</span>
+          <span style={styles.likeCount}>{likeCount}</span>
         </div>
       ) : (
-        <div style={styles.loginPrompt}>
-          いいねするには<Link to="/login">ログイン</Link>してください
+        <div style={styles.container}>
+          <div style={styles.likeButton}>
+            <span style={styles.icon}>👍</span>
+            <span style={styles.likeCount}>{likeCount}</span>
+          </div>
+          <div style={styles.loginPrompt}>
+            <Link to="/login">ログイン</Link>でいいね
+          </div>
         </div>
       )}
     </div>
