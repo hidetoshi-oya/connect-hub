@@ -6,6 +6,18 @@ module.exports = {
   DB: process.env.DB_NAME || 'connecthub',
   PORT: process.env.DB_PORT || 3306,
   dialect: 'mysql',
+  dialectOptions: {
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci',
+    supportBigNumbers: true,
+    bigNumberStrings: true
+  },
+  define: {
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci',
+    timestamps: true,
+    underscored: true
+  },
   pool: {
     max: 5,
     min: 0,
