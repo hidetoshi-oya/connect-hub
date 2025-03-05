@@ -45,7 +45,7 @@ services:
       context: ./server
       dockerfile: Dockerfile
     container_name: connect-hub-backend
-    restart: always
+    restart: on-failure
     environment:
       NODE_ENV: development
       PORT: 8000
@@ -65,7 +65,6 @@ services:
         condition: service_healthy
     networks:
       - connect-hub-network
-    restart: on-failure
   
   # フロントエンドサービス
   frontend:
