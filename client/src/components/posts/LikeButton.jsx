@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 
@@ -8,27 +8,23 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
   },
-  button: {
+  likeText: {
     display: 'flex',
     alignItems: 'center',
-    padding: '0.5rem 1rem',
-    backgroundColor: '#f8f9fa',
-    border: '1px solid #dee2e6',
-    borderRadius: '4px',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease-in-out',
+    transition: 'color 0.2s ease-in-out',
+    color: '#6c757d',
   },
-  buttonActive: {
-    backgroundColor: '#e9ecef',
-    borderColor: '#ced4da',
+  likeTextActive: {
+    color: '#0d6efd',
+    fontWeight: 'bold',
   },
   icon: {
     marginRight: '0.5rem',
-    fontSize: '1.25rem',
+    fontSize: '1rem',
   },
   count: {
     marginLeft: '0.25rem',
-    fontWeight: 'bold',
   },
   loginPrompt: {
     marginLeft: '0.5rem',
@@ -38,13 +34,43 @@ const styles = {
   processingOverlay: {
     opacity: 0.7,
     pointerEvents: 'none',
+  },
+  likeDisplay: {
+    fontSize: '0.9rem',
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: '0.5rem',
   }
 };
 
 const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [likeUsers, setLikeUsers] = useState([]);
   const likeCount = likes.length;
   const isLiked = currentUser && likes.some(like => like.user_id === currentUser.id);
+  
+  useEffect(() => {
+    // モックデータ用（実際の実装ではAPIからユーザー情報を取得する）
+    const mockUsers = [
+      { id: 1, name: '管理者 太郎' },
+      { id: 2, name: 'モデレータ 花子' },
+      { id: 3, name: '山田 太郎' },
+      { id: 4, name: '佐藤 健' },
+      { id: 5, name: '鈴木 一郎' },
+      { id: 6, name: '田中 美咲' },
+      { id: 7, name: '高橋 健太' },
+      { id: 8, name: '伊藤 洋子' },
+      { id: 9, name: '渡辺 和也' },
+      { id: 10, name: '小林 直樹' }
+    ];
+    
+    // いいねしたユーザーの情報を取得
+    const userEntities = likes.map(like => {
+      return mockUsers.find(user => user.id === like.user_id) || { id: like.user_id, name: 'ユーザー' };
+    });
+    
+    setLikeUsers(userEntities);
+  }, [likes]);
   
   const handleClick = async (e) => {
     // イベントの伝播を停止してリンクのクリックを防止
@@ -99,33 +125,50 @@ const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
     }
   };
   
+  // いいねの表示テキストを生成
+  const getLikeDisplayText = () => {
+    if (likeCount === 0) {
+      return 'まだいいねがありません';
+    }
+    
+    if (likeCount === 1) {
+      return `${likeUsers[0].name}がいいねしました`;
+    }
+    
+    if (likeCount === 2) {
+      return `${likeUsers[0].name}と${likeUsers[1].name}がいいねしました`;
+    }
+    
+    if (likeCount <= 5) {
+      const names = likeUsers.map(user => user.name);
+      return `${names.join('、')}がいいねしました`;
+    }
+    
+    // 5人以上の場合
+    return `${likeUsers[0].name}、${likeUsers[1].name}他 ${likeCount - 2}名がいいねしました`;
+  };
+  
   return (
-    <div style={styles.container}>
+    <div style={styles.container} onClick={(e) => e.stopPropagation()}>
+      <div style={styles.likeDisplay}>
+        <span style={styles.icon}>👍</span>
+        {getLikeDisplayText()}
+      </div>
+      
       {currentUser ? (
-        <button
+        <div
           style={{
-            ...styles.button,
-            ...(isLiked ? styles.buttonActive : {}),
+            ...styles.likeText,
+            ...(isLiked ? styles.likeTextActive : {}),
             ...(isProcessing ? styles.processingOverlay : {})
           }}
           onClick={handleClick}
         >
-          <span style={styles.icon}>
-            {isLiked ? '👍' : '👍'}
-          </span>
-          いいね
-          {likeCount > 0 && <span style={styles.count}>{likeCount}</span>}
-        </button>
+          {isLiked ? 'いいね済み' : 'いいねする'}
+        </div>
       ) : (
-        <div>
-          <div style={styles.button}>
-            <span style={styles.icon}>👍</span>
-            いいね
-            {likeCount > 0 && <span style={styles.count}>{likeCount}</span>}
-          </div>
-          <div style={styles.loginPrompt}>
-            いいねするには<Link to="/login">ログイン</Link>してください
-          </div>
+        <div style={styles.loginPrompt}>
+          いいねするには<Link to="/login">ログイン</Link>してください
         </div>
       )}
     </div>
