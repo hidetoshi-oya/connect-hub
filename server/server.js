@@ -30,6 +30,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 文字化け防止用ミドルウェア - レスポンスのContent-Typeに文字セットを追加
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 // Swagger UIを設定
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
