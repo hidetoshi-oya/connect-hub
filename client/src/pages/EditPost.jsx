@@ -47,12 +47,14 @@ const EditPost = () => {
   }, [id, currentUser, navigate]);
   
   const handleSubmit = async (formData) => {
+    // ヘッダー画像の変数をスコープの外で宣言
+    let headerImageUrl = formData.headerImage;
+    
     try {
       setSubmitting(true);
       setError('');
       
       // ヘッダー画像が File オブジェクトの場合はアップロード処理を行う
-      let headerImageUrl = formData.headerImage;
       if (formData.headerImageFile) {
         const imageFormData = new FormData();
         imageFormData.append('file', formData.headerImageFile);
@@ -64,8 +66,11 @@ const EditPost = () => {
       
       // APIを使って投稿データを更新
       const response = await axios.put(`/api/posts/${id}`, {
-        ...formData,
-        headerImage: headerImageUrl
+        title: formData.title,
+        content: formData.content,
+        headerImage: headerImageUrl,
+        categories: formData.categories,
+        isPinned: formData.isPinned || false
       }, {
         headers: {
           'Content-Type': 'application/json',
