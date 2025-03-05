@@ -77,17 +77,17 @@ exports.findAll = async (req, res) => {
     const postIds = posts.rows.map(post => post.id);
     const commentCounts = await Comment.findAll({
       attributes: [
-        'postId',
+        'post_id',
         [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'count']
       ],
-      where: { postId: postIds },
-      group: ['postId']
+      where: { post_id: postIds },
+      group: ['post_id']
     });
     
     // コメント数をマッピング
     const commentCountMap = {};
     commentCounts.forEach(item => {
-      commentCountMap[item.postId] = item.dataValues.count;
+      commentCountMap[item.post_id] = item.dataValues.count;
     });
     
     // レスポンス用にデータを整形
@@ -515,8 +515,8 @@ exports.toggleLike = async (req, res) => {
     // いいねの存在を確認
     const like = await Like.findOne({
       where: {
-        postId: postId,
-        userId: userId
+        post_id: postId,
+        user_id: userId
       }
     });
     
@@ -531,8 +531,8 @@ exports.toggleLike = async (req, res) => {
     } else {
       // いいねの追加
       await Like.create({
-        postId: postId,
-        userId: userId
+        post_id: postId,
+        user_id: userId
       });
       return res.json({
         message: 'いいねしました',
@@ -634,7 +634,7 @@ exports.getComments = async (req, res) => {
     
     // コメントを取得
     const comments = await Comment.findAll({
-      where: { postId: postId },
+      where: { post_id: postId },
       include: [
         {
           model: User,
@@ -681,8 +681,8 @@ exports.addComment = async (req, res) => {
     // コメントを作成
     const comment = await Comment.create({
       content,
-      postId,
-      authorId: userId
+      post_id: postId,
+      author_id: userId
     });
     
     // 作成したコメントを取得
@@ -721,7 +721,7 @@ exports.deleteComment = async (req, res) => {
     
     // コメントを取得
     const comment = await Comment.findOne({
-      where: { id: commentId, postId: postId },
+      where: { id: commentId, post_id: postId },
       include: [
         {
           model: User,
@@ -739,7 +739,7 @@ exports.deleteComment = async (req, res) => {
     // 権限チェック（コメント投稿者または管理者のみ削除可能）
     const user = await User.findByPk(userId);
     
-    if (comment.authorId !== userId && user.role !== 'admin') {
+    if (comment.author_id !== userId && user.role !== 'admin') {
       return res.status(403).json({
         message: 'このコメントを削除する権限がありません'
       });
