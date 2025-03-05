@@ -26,8 +26,8 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     role: {
-      type: DataTypes.ENUM('admin', 'moderator', 'contributor', 'viewer'),
-      defaultValue: 'contributor'
+      type: DataTypes.ENUM('admin', 'moderator', 'contributor', 'user'),
+      defaultValue: 'user'
     },
     avatar_url: {
       type: DataTypes.STRING,
