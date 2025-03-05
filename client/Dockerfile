@@ -13,6 +13,12 @@ RUN npm install
 # プロジェクトファイルをコピー
 COPY . .
 
+# ホストからアクセスできるようにするための設定
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV WDS_SOCKET_HOST=0.0.0.0
+ENV WDS_SOCKET_PORT=3000
+
 EXPOSE 3000
 
 # 開発モードでReactアプリを起動
