@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS users (
     department VARCHAR(100) NOT NULL,
     avatar_url VARCHAR(255),
     role ENUM('admin', 'moderator', 'contributor', 'user') DEFAULT 'user',
+    is_active BOOLEAN DEFAULT TRUE,
+    bio TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
