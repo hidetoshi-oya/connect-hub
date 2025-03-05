@@ -22,13 +22,13 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// モデルのインポート - 実際のファイル名に合わせて修正
+// モデルのインポート - すべて .model.js フォーマットを使用
 db.User = require('./user.model')(sequelize, DataTypes);
 db.Post = require('./post.model')(sequelize, DataTypes);
-db.Category = require('./Category')(sequelize, DataTypes);
-db.Comment = require('./Comment')(sequelize, DataTypes);
-db.Like = require('./Like')(sequelize, DataTypes);
-db.PostCategory = require('./PostCategory')(sequelize, DataTypes);
+db.Category = require('./category.model')(sequelize, DataTypes);
+db.Comment = require('./comment.model')(sequelize, DataTypes);
+db.Like = require('./like.model')(sequelize, DataTypes);
+db.PostCategory = require('./postCategory.model')(sequelize, DataTypes);
 
 // リレーションシップの設定
 // User - Post (1対多)
