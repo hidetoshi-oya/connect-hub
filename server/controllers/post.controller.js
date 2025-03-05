@@ -16,7 +16,7 @@ exports.findAll = async (req, res) => {
     let where = {};
     
     if (isPinned === 'true') {
-      where.isPinned = true;
+      where.is_pinned = true;
     }
     
     if (search) {
@@ -65,7 +65,7 @@ exports.findAll = async (req, res) => {
       where,
       include: includeOptions,
       order: [
-        ['isPinned', 'DESC'],
+        ['is_pinned', 'DESC'],
         ['created_at', 'DESC']
       ],
       limit: parseInt(limit),
@@ -98,7 +98,7 @@ exports.findAll = async (req, res) => {
         id: post.id,
         title: post.title,
         content: post.content,
-        isPinned: post.isPinned,
+        isPinned: post.is_pinned,
         created_at: post.created_at,
         updated_at: post.updated_at,
         author: post.author,
@@ -162,7 +162,7 @@ exports.search = async (req, res) => {
         }
       ],
       order: [
-        ['isPinned', 'DESC'],
+        ['is_pinned', 'DESC'],
         ['created_at', 'DESC']
       ],
       limit: parseInt(limit),
@@ -178,7 +178,7 @@ exports.search = async (req, res) => {
         id: post.id,
         title: post.title,
         content: post.content,
-        isPinned: post.isPinned,
+        isPinned: post.is_pinned,
         created_at: post.created_at,
         updated_at: post.updated_at,
         author: post.author,
@@ -262,7 +262,7 @@ exports.findOne = async (req, res) => {
       id: post.id,
       title: post.title,
       content: post.content,
-      isPinned: post.isPinned,
+      isPinned: post.is_pinned,
       views: post.views + 1, // インクリメント後の値
       created_at: post.created_at,
       updated_at: post.updated_at,
@@ -293,7 +293,7 @@ exports.create = async (req, res) => {
     const post = await Post.create({
       title,
       content,
-      isPinned: isPinned || false,
+      is_pinned: isPinned || false,
       authorId: userId
     });
     
@@ -334,7 +334,7 @@ exports.create = async (req, res) => {
         id: createdPost.id,
         title: createdPost.title,
         content: createdPost.content,
-        isPinned: createdPost.isPinned,
+        isPinned: createdPost.is_pinned,
         created_at: createdPost.created_at,
         updated_at: createdPost.updated_at,
         author: createdPost.author,
@@ -387,7 +387,7 @@ exports.update = async (req, res) => {
     await post.update({
       title: title || post.title,
       content: content || post.content,
-      isPinned: isPinned !== undefined ? isPinned : post.isPinned
+      is_pinned: isPinned !== undefined ? isPinned : post.is_pinned
     });
     
     // カテゴリを更新
@@ -436,7 +436,7 @@ exports.update = async (req, res) => {
         id: updatedPost.id,
         title: updatedPost.title,
         content: updatedPost.content,
-        isPinned: updatedPost.isPinned,
+        isPinned: updatedPost.is_pinned,
         created_at: updatedPost.created_at,
         updated_at: updatedPost.updated_at,
         author: updatedPost.author,
