@@ -20,30 +20,48 @@ if [ "$(docker ps -a -q -f name=connect-hub)" ]; then
   docker rm $(docker ps -a -q -f name=connect-hub)
 fi
 
-# ボリュームを削除
+# 全てのプロジェクト関連ボリュームを削除
 echo -e "${YELLOW}関連するボリュームを削除しています...${NC}"
+
+# docker-compose.ymlで定義された名前付きボリュームを削除
+docker-compose down -v
+
+# その他のプロジェクト関連ボリュームを削除
 if [ "$(docker volume ls -q -f name=connect-hub)" ]; then
   docker volume rm $(docker volume ls -q -f name=connect-hub)
+fi
+
+if [ "$(docker volume ls -q -f name=mysql_data)" ]; then
+  docker volume rm mysql_data
+fi
+
+if [ "$(docker volume ls -q -f name=backend_logs)" ]; then
+  docker volume rm backend_logs
+fi
+
+if [ "$(docker volume ls -q -f name=frontend_logs)" ]; then
+  docker volume rm frontend_logs
 fi
 
 # バックエンドとフロントエンドの特定ボリュームを削除
 if [ "$(docker volume ls -q -f name=backend_node_modules)" ]; then
   docker volume rm backend_node_modules
 fi
+
 if [ "$(docker volume ls -q -f name=frontend_node_modules)" ]; then
   docker volume rm frontend_node_modules
 fi
 
-# 全てのプロジェクト関連ボリュームを削除
-if [ "$(docker volume ls -q -f name=connecthub)" ]; then
-  docker volume rm $(docker volume ls -q -f name=connecthub)
-fi
+# プルーニングでDanglingボリュームも削除
+echo -e "${YELLOW}未使用のボリュームを削除しています...${NC}"
+docker volume prune -f
 
 # イメージを削除
 echo -e "${YELLOW}関連するイメージを削除しています...${NC}"
 if [ "$(docker images -q connect-hub-backend)" ]; then
   docker rmi connect-hub-backend
 fi
+
 if [ "$(docker images -q connect-hub-frontend)" ]; then
   docker rmi connect-hub-frontend
 fi
