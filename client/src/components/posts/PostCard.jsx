@@ -4,6 +4,9 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import LikeButton from './LikeButton';
 
+// デフォルトのアバター画像
+const DEFAULT_AVATAR = 'https://via.placeholder.com/24?text=User';
+
 // スタイル
 const styles = {
   card: {
@@ -230,12 +233,12 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
               <div style={styles.meta}>
                 <div style={styles.author}>
                   <img
-                    src={updatedPost.author.avatar_url || '/default-avatar.png'}
+                    src={updatedPost.author.avatar_url || DEFAULT_AVATAR}
                     alt={updatedPost.author.name}
                     style={styles.authorAvatar}
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = '/default-avatar.png';
+                      e.target.src = DEFAULT_AVATAR;
                     }}
                   />
                   <span>{updatedPost.author.name}</span>
