@@ -33,6 +33,8 @@ services:
       --explicit_defaults_for_timestamp=1
       --max_allowed_packet=16M
       --innodb-buffer-pool-size=64M
+      --init-connect='SET NAMES utf8mb4'
+      --skip-character-set-client-handshake
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "connecthub_user", "--password=connecthub_password"]
       interval: 10s
