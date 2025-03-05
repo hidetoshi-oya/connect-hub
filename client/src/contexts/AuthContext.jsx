@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api';
 
 // 認証コンテキストを作成
 const AuthContext = createContext();
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     
     if (storedUser && storedToken) {
       setCurrentUser(JSON.parse(storedUser));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       
       // トークンの有効性を確認（任意）
       verifyToken(storedToken);
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   const verifyToken = async (token) => {
     try {
       // サーバーAPIでトークンの有効性を確認
-      await axios.get('/api/auth/verify', {
+      await api.get('/auth/verify', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
       setError('');
       
       // APIを呼び出してログイン認証を行う
-      const response = await axios.post('/api/auth/login', { 
+      const response = await api.post('/auth/login', { 
         email, 
         password 
       });
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       const { token, user } = response.data;
       
       // トークンをヘッダーに設定
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       // ユーザー情報をローカルストレージに保存
       localStorage.setItem('token', token);
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
           const mockToken = 'test_token_for_admin';
           
           // トークンをヘッダーに設定
-          axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+          api.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
           
           // ユーザー情報をローカルストレージに保存
           localStorage.setItem('token', mockToken);
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }) => {
           const mockToken = 'test_token_for_user';
           
           // トークンをヘッダーに設定
-          axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+          api.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
           
           // ユーザー情報をローカルストレージに保存
           localStorage.setItem('token', mockToken);
@@ -146,13 +146,13 @@ export const AuthProvider = ({ children }) => {
       setError('');
       
       // APIを呼び出して新規登録を行う
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/auth/register', userData);
       
       // レスポンスからトークンとユーザー情報を取得
       const { token, user } = response.data;
       
       // トークンをヘッダーに設定
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
       // ユーザー情報をローカルストレージに保存
       localStorage.setItem('token', token);
@@ -189,7 +189,7 @@ export const AuthProvider = ({ children }) => {
         const mockToken = 'test_token_for_new_user';
         
         // トークンをヘッダーに設定
-        axios.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${mockToken}`;
         
         // ユーザー情報をローカルストレージに保存
         localStorage.setItem('token', mockToken);
@@ -212,7 +212,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     
     // ヘッダーからトークンを削除
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     
     // ユーザー情報をクリア
     setCurrentUser(null);
