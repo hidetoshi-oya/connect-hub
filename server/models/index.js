@@ -23,6 +23,12 @@ const sequelize = new Sequelize(
       ],
       backoffBase: 1000,
       backoffExponent: 1.5,
+    },
+    define: {
+      underscored: true,  // スネークケースのカラム名を使用
+      timestamps: true,
+      createdAt: 'created_at',
+      updatedAt: 'updated_at'
     }
   }
 );
@@ -43,39 +49,39 @@ db.PostCategory = require('./postCategory.model')(sequelize, DataTypes);
 
 // リレーションシップの設定
 // User - Post (1対多)
-db.User.hasMany(db.Post, { as: 'posts', foreignKey: 'authorId' });
-db.Post.belongsTo(db.User, { as: 'author', foreignKey: 'authorId' });
+db.User.hasMany(db.Post, { as: 'posts', foreignKey: 'author_id' });
+db.Post.belongsTo(db.User, { as: 'author', foreignKey: 'author_id' });
 
 // User - Comment (1対多)
-db.User.hasMany(db.Comment, { as: 'comments', foreignKey: 'authorId' });
-db.Comment.belongsTo(db.User, { as: 'author', foreignKey: 'authorId' });
+db.User.hasMany(db.Comment, { as: 'comments', foreignKey: 'author_id' });
+db.Comment.belongsTo(db.User, { as: 'author', foreignKey: 'author_id' });
 
 // Post - Comment (1対多)
-db.Post.hasMany(db.Comment, { as: 'comments', foreignKey: 'postId' });
-db.Comment.belongsTo(db.Post, { as: 'post', foreignKey: 'postId' });
+db.Post.hasMany(db.Comment, { as: 'comments', foreignKey: 'post_id' });
+db.Comment.belongsTo(db.Post, { as: 'post', foreignKey: 'post_id' });
 
 // Post - Category (多対多)
 db.Post.belongsToMany(db.Category, { 
   through: db.PostCategory,
   as: 'categories',
-  foreignKey: 'postId' 
+  foreignKey: 'post_id' 
 });
 db.Category.belongsToMany(db.Post, { 
   through: db.PostCategory,
   as: 'posts',
-  foreignKey: 'categoryId' 
+  foreignKey: 'category_id' 
 });
 
 // User - Post (いいね) (多対多)
 db.User.belongsToMany(db.Post, { 
   through: db.Like,
   as: 'likedPosts',
-  foreignKey: 'userId' 
+  foreignKey: 'user_id' 
 });
 db.Post.belongsToMany(db.User, { 
   through: db.Like,
   as: 'likedBy',
-  foreignKey: 'postId' 
+  foreignKey: 'post_id' 
 });
 
 module.exports = db;
