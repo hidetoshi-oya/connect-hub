@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Auth.module.css';
@@ -9,12 +9,19 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  const { login } = useAuth();
+  const { login, currentUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // リダイレクト先を取得
+  // リダイレクト先を取得（なければホームページ）
   const redirectPath = location.state?.from?.pathname || '/';
+
+  // すでにログインしている場合は、リダイレクト先またはホームページに遷移
+  useEffect(() => {
+    if (currentUser) {
+      navigate(redirectPath, { replace: true });
+    }
+  }, [currentUser, navigate, redirectPath]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,8 +39,7 @@ const Login = () => {
       // ログイン処理
       await login(email, password);
       
-      // ログイン成功後、リダイレクト先にナビゲート
-      navigate(redirectPath, { replace: true });
+      // ログイン成功後の処理はuseEffectで行われる
     } catch (err) {
       console.error('ログインエラー:', err);
       setError(err.response?.data?.message || 'ログインに失敗しました');
@@ -50,6 +56,12 @@ const Login = () => {
         </div>
         
         <h2 className={styles.formTitle}>ログイン</h2>
+        
+        {location.state?.from && (
+          <div className={styles.redirectInfo}>
+            このページにアクセスするにはログインが必要です
+          </div>
+        )}
         
         {error && <div className={styles.error}>{error}</div>}
         
