@@ -100,23 +100,19 @@ const styles = {
     fontSize: '0.8rem',
   },
   footer: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginTop: '1rem',
   },
-  stats: {
-    display: 'flex',
-    gap: '1rem',
-    color: '#6c757d',
-    fontSize: '0.9rem',
+  engagementSection: {
+    borderTop: '1px solid #e9ecef',
+    paddingTop: '0.75rem',
+    marginTop: '0.5rem',
   },
-  stat: {
+  commentCount: {
     display: 'flex',
     alignItems: 'center',
-  },
-  icon: {
-    marginRight: '0.25rem',
+    color: '#6c757d',
+    fontSize: '0.9rem',
+    marginTop: '0.5rem',
   },
   readMore: {
     display: 'inline-flex',
@@ -124,6 +120,7 @@ const styles = {
     color: '#4a90e2',
     textDecoration: 'none',
     fontSize: '0.9rem',
+    marginTop: '0.75rem',
   },
   link: {
     textDecoration: 'none',
@@ -137,14 +134,8 @@ const styles = {
     fontSize: '0.9rem',
     marginBottom: '0.5rem',
   },
-  likeButtonContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginRight: '1rem',
-  },
-  commentCount: {
-    display: 'flex',
-    alignItems: 'center',
+  icon: {
+    marginRight: '0.25rem',
   }
 };
 
@@ -177,13 +168,13 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
 
     // Markdownの記法を取り除く（簡易的な実装）
     let plainText = text
-      .replace(/!\[(.*?)\]\((.*?)\)/g, '[画像]') // 画像を[画像]テキストに置換
-      .replace(/\*\*(.*?)\*\*/g, '$1')      // 太字を通常テキストに変換
-      .replace(/\*(.*?)\*/g, '$1')          // イタリックを通常テキストに変換
+      .replace(/!\\[(.*?)\\]\\((.*?)\\)/g, '[画像]') // 画像を[画像]テキストに置換
+      .replace(/\\*\\*(.*?)\\*\\*/g, '$1')      // 太字を通常テキストに変換
+      .replace(/\\*(.*?)\\*/g, '$1')          // イタリックを通常テキストに変換
       .replace(/__(.*?)__/g, '$1')          // 下線を通常テキストに変換
-      .replace(/^##\s+(.*)$/gm, '$1')       // 見出し2を通常テキストに変換
-      .replace(/^###\s+(.*)$/gm, '$1')      // 見出し3を通常テキストに変換
-      .replace(/^-\s+(.*)$/gm, '$1');       // リストを通常テキストに変換
+      .replace(/^##\\s+(.*)$/gm, '$1')       // 見出し2を通常テキストに変換
+      .replace(/^###\\s+(.*)$/gm, '$1')      // 見出し3を通常テキストに変換
+      .replace(/^-\\s+(.*)$/gm, '$1');       // リストを通常テキストに変換
 
     if (plainText.length <= maxLength) return plainText;
     return plainText.slice(0, maxLength) + '...';
@@ -257,8 +248,8 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
             </div>
             
             <div style={styles.footer}>
-              <div style={styles.stats}>
-                <div style={styles.likeButtonContainer} onClick={(e) => e.preventDefault()}>
+              <div style={styles.engagementSection}>
+                <div onClick={(e) => e.preventDefault()}>
                   <LikeButton
                     postId={updatedPost.id}
                     likes={updatedPost.likes}
@@ -268,7 +259,7 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
                 </div>
                 <div style={styles.commentCount}>
                   <span style={styles.icon}>💬</span>
-                  {updatedPost.comments_count || (updatedPost.comments && updatedPost.comments.length) || 0}
+                  {updatedPost.comments_count || 0} 件のコメント
                 </div>
               </div>
               
