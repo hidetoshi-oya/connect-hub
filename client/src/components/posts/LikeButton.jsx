@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../services/api';
 
 // スタイル - 将来的にはモジュールCSSを作成
 const styles = {
@@ -57,11 +57,7 @@ const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
       setIsProcessing(true);
       
       // APIを呼び出していいねを切り替える
-      const response = await axios.post(`/api/posts/${postId}/like`, {}, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.post(`/posts/${postId}/like`);
       
       // いいねの更新完了
       setIsProcessing(false);
