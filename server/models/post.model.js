@@ -13,12 +13,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    isPinned: {
+    is_pinned: {
       type: DataTypes.BOOLEAN,
+      field: 'is_pinned',
       defaultValue: false
     },
     authorId: {
       type: DataTypes.INTEGER,
+      field: 'author_id',
       allowNull: false
     },
     views: {
