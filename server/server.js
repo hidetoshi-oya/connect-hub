@@ -87,19 +87,22 @@ async function connectToDatabase() {
       console.log("データベース接続に成功しました！");
       connected = true;
       
-      // データベース同期（慎重にモードを設定）
-      // force: true はテーブルをドロップして再作成します。開発初期段階でのみ使用
-      // alter: true は既存のテーブルに対して差分を適用（より安全）
-      await db.sequelize.sync({ force: false, alter: false });
-      console.log("データベースの同期が完了しました");
+      // 開発環境では注意してスキーマを同期する
+      // 本番環境では force: false かつ alter: false が安全
+      // 初回起動時のみ alter: true で実行
+      try {
+        await db.sequelize.sync({ force: false, alter: false });
+        console.log("データベースの同期が完了しました");
+      } catch (syncError) {
+        console.error("データベース同期中にエラーが発生しました:", syncError.message);
+      }
       
       // 初期データの作成（開発環境のみ）
-      if (process.env.NODE_ENV === 'development' && retries === 0) {
+      if (process.env.NODE_ENV === 'development') {
         try {
           await require('./seeders')();
-          console.log("初期データの作成が完了しました");
         } catch (seedError) {
-          console.error("初期データの作成中にエラーが発生しました:", seedError.message);
+          console.error("初期データの作成中にエラーが発生しました:", seedError);
         }
       }
     } catch (error) {
