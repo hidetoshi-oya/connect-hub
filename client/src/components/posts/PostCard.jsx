@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import LikeButton from './LikeButton';
 
-// スタイル - 将来的にはモジュールCSSを作成
+// スタイル
 const styles = {
   card: {
     backgroundColor: 'white',
@@ -174,7 +174,7 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
 
     // Markdownの記法を取り除く（簡易的な実装）
     let plainText = text
-      .replace(/!\[.*?\]\(.*?\)/g, '[画像]') // 画像を[画像]テキストに置換
+      .replace(/!\[(.*?)\]\((.*?)\)/g, '[画像]') // 画像を[画像]テキストに置換
       .replace(/\*\*(.*?)\*\*/g, '$1')      // 太字を通常テキストに変換
       .replace(/\*(.*?)\*/g, '$1')          // イタリックを通常テキストに変換
       .replace(/__(.*?)__/g, '$1')          // 下線を通常テキストに変換
@@ -265,7 +265,7 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
                 </div>
                 <div style={styles.commentCount}>
                   <span style={styles.icon}>💬</span>
-                  {updatedPost.comments_count || updatedPost.comments?.length || 0}
+                  {updatedPost.comments_count || (updatedPost.comments && updatedPost.comments.length) || 0}
                 </div>
               </div>
               
