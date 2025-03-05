@@ -27,10 +27,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     role: {
       type: DataTypes.ENUM('admin', 'moderator', 'contributor', 'user'),
+      field: 'role',
       defaultValue: 'user'
     },
     avatar_url: {
       type: DataTypes.STRING,
+      field: 'avatar_url',
       defaultValue: '/avatars/default.jpg'
     },
     bio: {
@@ -38,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     is_active: {
       type: DataTypes.BOOLEAN,
+      field: 'is_active',
       defaultValue: true
     }
   }, {
