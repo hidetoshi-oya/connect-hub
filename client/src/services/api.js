@@ -1,10 +1,8 @@
 import axios from 'axios';
 
 // APIサービスのベースURL
-// 開発環境では同一オリジンに対するリクエストとなるようproxyを使用
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? process.env.REACT_APP_API_URL 
-  : '/api';
+// どの環境でも常にREACT_APP_API_URLを使用
+const API_URL = process.env.REACT_APP_API_URL;
 
 // Axiosのインスタンスを作成
 const api = axios.create({
