@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/auth/PrivateRoute';
 import AdminRoute from './components/auth/AdminRoute';
@@ -31,12 +31,11 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="posts/:id" element={<PostDetail />} />
-            <Route path="profile/:id" element={<Profile />} />
-            
-            {/* 認証が必要なルート */}
+            {/* メイン機能はすべてログインが必要 */}
             <Route element={<PrivateRoute />}>
+              <Route index element={<Home />} />
+              <Route path="posts/:id" element={<PostDetail />} />
+              <Route path="profile/:id" element={<Profile />} />
               <Route path="posts/create" element={<CreatePost />} />
               <Route path="posts/edit/:id" element={<EditPost />} />
             </Route>
@@ -47,6 +46,9 @@ function App() {
               <Route path="admin/categories" element={<CategoryManagement />} />
             </Route>
           </Route>
+          
+          {/* その他のパスはすべてホームページにリダイレクト */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
