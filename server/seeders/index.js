@@ -72,10 +72,29 @@ module.exports = async () => {
       console.log('- 一般ユーザーは既に存在します');
     }
     
+    // ユーザーIDを取得して表示（デバッグ）
+    console.log(`- ユーザーID確認: admin=${admin.id}, moderator=${moderator.id}, user=${user.id}`);
+    
     // 既存データをチェック（カテゴリ）
     const existingNoticeCategory = await Category.findOne({ where: { name: 'お知らせ' } });
     if (existingNoticeCategory) {
       console.log('- カテゴリデータは既に存在します');
+      
+      // カテゴリが既に存在する場合は、投稿の存在もチェック
+      const existingPost = await Post.findOne({ where: { title: '新しい社内報システムのβ版がリリースされました！' } });
+      if (existingPost) {
+        console.log('- 投稿データは既に存在します');
+      } else {
+        // 必要なカテゴリを取得
+        const noticeCategory = await Category.findOne({ where: { name: 'お知らせ' } });
+        const systemCategory = await Category.findOne({ where: { name: '社内システム' } });
+        const projectCategory = await Category.findOne({ where: { name: 'プロジェクト' } });
+        const recruitCategory = await Category.findOne({ where: { name: '募集' } });
+        const eventCategory = await Category.findOne({ where: { name: 'イベント' } });
+        
+        // 投稿の作成
+        await createPosts(admin, user, moderator, [noticeCategory, systemCategory, projectCategory, recruitCategory, eventCategory]);
+      }
     } else {
       // カテゴリの作成
       const categories = await Category.bulkCreate([
@@ -100,9 +119,25 @@ module.exports = async () => {
         console.log('- 投稿データは既に存在します');
       } else {
         // 投稿の作成
-        const post1 = await Post.create({
-          title: '新しい社内報システムのβ版がリリースされました！',
-          content: `長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。
+        await createPosts(admin, user, moderator, categories);
+      }
+    }
+    
+    console.log('初期データの作成が完了しました！');
+  } catch (err) {
+    console.error('初期データの作成中にエラーが発生しました:', err);
+  }
+};
+
+// 投稿作成のヘルパー関数
+async function createPosts(admin, user, moderator, categories) {
+  try {
+    console.log(`投稿を作成中... admin.id=${admin.id}, user.id=${user.id}, moderator.id=${moderator.id}`);
+    
+    // 投稿の作成
+    const post1 = await Post.create({
+      title: '新しい社内報システムのβ版がリリースされました！',
+      content: `長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。
 
 主な機能は以下の通りです：
 
@@ -113,13 +148,13 @@ module.exports = async () => {
 - ピックアップ記事：重要な投稿を上部に固定表示
 
 ご不明な点があればIT部までお問い合わせください。`,
-          is_pinned: true,
-          author_id: admin.id
-        });
-        
-        const post2 = await Post.create({
-          title: '4月からの新プロジェクトメンバー募集',
-          content: `次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。
+      is_pinned: true,
+      authorId: admin.id  // フィールド名をモデル定義と合わせる
+    });
+    
+    const post2 = await Post.create({
+      title: '4月からの新プロジェクトメンバー募集',
+      content: `次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。
 
 【プロジェクト概要】
 ・基幹システムリニューアル
@@ -134,13 +169,13 @@ module.exports = async () => {
 【応募方法】
 開発部の山田までメールにてご連絡ください。
 応募締切：3月20日`,
-          is_pinned: false,
-          author_id: user.id
-        });
-        
-        const post3 = await Post.create({
-          title: '社内イベントのお知らせ：夏祭り',
-          content: `今年も社内夏祭りを開催します。皆様のご参加をお待ちしております。
+      is_pinned: false,
+      authorId: user.id  // フィールド名をモデル定義と合わせる
+    });
+    
+    const post3 = await Post.create({
+      title: '社内イベントのお知らせ：夏祭り',
+      content: `今年も社内夏祭りを開催します。皆様のご参加をお待ちしております。
 
 【開催日時】
 2023年7月15日（土）15:00〜20:00
@@ -160,67 +195,78 @@ module.exports = async () => {
 【申し込み方法】
 人事部の花子までメールにてご連絡ください。
 申し込み締切：7月5日`,
-          is_pinned: true,
-          author_id: moderator.id
-        });
-        console.log('- 投稿データを作成しました');
-        
-        // カテゴリと投稿の関連付け
-        await post1.addCategories([
-          categories.find(c => c.name === 'お知らせ'),
-          categories.find(c => c.name === '社内システム')
-        ]);
-        
-        await post2.addCategories([
-          categories.find(c => c.name === 'プロジェクト'),
-          categories.find(c => c.name === '募集')
-        ]);
-        
-        await post3.addCategories([
-          categories.find(c => c.name === 'イベント'),
-          categories.find(c => c.name === 'お知らせ')
-        ]);
-        console.log('- 投稿とカテゴリを関連付けました');
-        
-        // コメントの作成
-        await Comment.create({
-          content: '待っていました！早速使ってみます。',
-          post_id: post1.id,
-          author_id: moderator.id
-        });
-        console.log('- コメントデータを作成しました');
-        
-        // いいねの作成
-        await Like.create({
-          user_id: moderator.id,
-          post_id: post1.id
-        });
-        
-        await Like.create({
-          user_id: user.id,
-          post_id: post1.id
-        });
-        
-        await Like.create({
-          user_id: admin.id,
-          post_id: post2.id
-        });
-        
-        await Like.create({
-          user_id: admin.id,
-          post_id: post3.id
-        });
-        
-        await Like.create({
-          user_id: user.id,
-          post_id: post3.id
-        });
-        console.log('- いいねデータを作成しました');
-      }
+      is_pinned: true,
+      authorId: moderator.id  // フィールド名をモデル定義と合わせる
+    });
+    console.log('- 投稿データを作成しました');
+    
+    // カテゴリと投稿の関連付け
+    let noticeCategory, systemCategory, projectCategory, recruitCategory, eventCategory;
+    
+    if (Array.isArray(categories)) {
+      // bulkCreateの結果からカテゴリを検索
+      noticeCategory = categories.find(c => c.name === 'お知らせ');
+      systemCategory = categories.find(c => c.name === '社内システム');
+      projectCategory = categories.find(c => c.name === 'プロジェクト');
+      recruitCategory = categories.find(c => c.name === '募集');
+      eventCategory = categories.find(c => c.name === 'イベント');
+    } else {
+      // カテゴリの配列が渡された場合
+      [noticeCategory, systemCategory, projectCategory, recruitCategory, eventCategory] = categories;
     }
     
-    console.log('初期データの作成が完了しました！');
-  } catch (err) {
-    console.error('初期データの作成中にエラーが発生しました:', err);
+    // カテゴリが存在することを確認してから関連付け
+    if (noticeCategory && systemCategory) {
+      await post1.addCategories([noticeCategory, systemCategory]);
+    }
+    
+    if (projectCategory && recruitCategory) {
+      await post2.addCategories([projectCategory, recruitCategory]);
+    }
+    
+    if (eventCategory && noticeCategory) {
+      await post3.addCategories([eventCategory, noticeCategory]);
+    }
+    console.log('- 投稿とカテゴリを関連付けました');
+    
+    // コメントの作成
+    await Comment.create({
+      content: '待っていました！早速使ってみます。',
+      post_id: post1.id,
+      author_id: moderator.id
+    });
+    console.log('- コメントデータを作成しました');
+    
+    // いいねの作成
+    await Like.create({
+      user_id: moderator.id,
+      post_id: post1.id
+    });
+    
+    await Like.create({
+      user_id: user.id,
+      post_id: post1.id
+    });
+    
+    await Like.create({
+      user_id: admin.id,
+      post_id: post2.id
+    });
+    
+    await Like.create({
+      user_id: admin.id,
+      post_id: post3.id
+    });
+    
+    await Like.create({
+      user_id: user.id,
+      post_id: post3.id
+    });
+    console.log('- いいねデータを作成しました');
+    
+    return [post1, post2, post3];
+  } catch (error) {
+    console.error('投稿作成中にエラーが発生しました:', error);
+    throw error;
   }
-};
+}
