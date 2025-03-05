@@ -153,7 +153,13 @@ const PostDetail = () => {
         // APIから投稿データを取得
         const response = await api.get(`/posts/${id}`);
         
-        setPost(response.data);
+        // ここでコメントなどの初期化を確実に行う
+        const fetchedPost = response.data;
+        if (!fetchedPost.comments) {
+          fetchedPost.comments = [];
+        }
+        
+        setPost(fetchedPost);
         setLoading(false);
       } catch (err) {
         console.error('投稿の取得に失敗しました', err);
@@ -265,24 +271,44 @@ const PostDetail = () => {
   
   // コメント追加処理
   const handleAddComment = async (commentContent) => {
+    if (!commentContent || !post) return;
+    
     try {
       // APIを使ってコメントを追加
       const response = await api.post(`/posts/${id}/comments`, {
         content: commentContent
       });
       
-      // 新しいコメントを投稿に追加
-      const newComment = response.data.comment;
-      setPost({
-        ...post,
-        comments: [...post.comments, newComment]
-      });
+      // レスポンスからコメントデータを取得
+      let newComment;
       
-      return newComment; // 成功時は追加されたコメントを返す
+      // APIレスポンスの形式に応じて適切に処理
+      if (response.data && response.data.comment) {
+        newComment = response.data.comment;
+      } else if (response.data) {
+        // API返却値がコメントオブジェクト直接の場合
+        newComment = response.data;
+      } else {
+        // フォールバック：コメントを自分で構築
+        newComment = {
+          id: Date.now(), // 一時的なユニークID
+          content: commentContent,
+          author: currentUser,
+          created_at: new Date()
+        };
+      }
+      
+      // 新しいコメントを投稿に追加
+      setPost(prevPost => ({
+        ...prevPost,
+        comments: [...prevPost.comments, newComment]
+      }));
+      
+      return true;
     } catch (err) {
       console.error('コメントの追加に失敗しました', err);
       
-      // 開発用フォールバック
+      // 開発用：モックのコメントを追加
       const mockNewComment = {
         id: Date.now(), // 一時的なユニークID
         content: commentContent,
@@ -291,37 +317,38 @@ const PostDetail = () => {
       };
       
       // 新しいコメントを投稿に追加
-      setPost({
-        ...post,
-        comments: [...post.comments, mockNewComment]
-      });
+      setPost(prevPost => ({
+        ...prevPost,
+        comments: [...prevPost.comments, mockNewComment]
+      }));
       
-      return mockNewComment;
+      return true;
     }
   };
   
   // コメント削除処理
   const handleDeleteComment = async (commentId) => {
+    if (!post) return false;
+    
     try {
       // APIを使ってコメントを削除
       await api.delete(`/posts/${id}/comments/${commentId}`);
       
       // コメントを削除
-      setPost({
-        ...post,
-        comments: post.comments.filter(comment => comment.id !== commentId)
-      });
+      setPost(prevPost => ({
+        ...prevPost,
+        comments: prevPost.comments.filter(comment => comment.id !== commentId)
+      }));
       
       return true; // 成功時はtrueを返す
     } catch (err) {
       console.error('コメントの削除に失敗しました', err);
       
-      // 開発用フォールバック
-      // コメントを削除
-      setPost({
-        ...post,
-        comments: post.comments.filter(comment => comment.id !== commentId)
-      });
+      // 開発用フォールバック：UIからコメントを削除
+      setPost(prevPost => ({
+        ...prevPost,
+        comments: prevPost.comments.filter(comment => comment.id !== commentId)
+      }));
       
       return true;
     }
@@ -484,7 +511,7 @@ const PostDetail = () => {
             </div>
           </div>
           <div style={styles.categories}>
-            {post.categories.map((category, index) => (
+            {post.categories && post.categories.map((category, index) => (
               <Link to={`/?category=${encodeURIComponent(category.name)}`} key={index} style={{ textDecoration: 'none' }}>
                 <span style={styles.category}>{category.name}</span>
               </Link>
@@ -503,7 +530,7 @@ const PostDetail = () => {
         <div onClick={(e) => e.preventDefault()}>
           <LikeButton
             postId={post.id}
-            likes={post.likes}
+            likes={post.likes || []}
             currentUser={currentUser}
             onUpdate={handleLikeUpdate}
           />
@@ -525,7 +552,7 @@ const PostDetail = () => {
       </div>
       
       <div style={styles.commentsContainer}>
-        <h2 style={styles.commentsHeader}>コメント ({post.comments.length})</h2>
+        <h2 style={styles.commentsHeader}>コメント ({post.comments ? post.comments.length : 0})</h2>
         
         {currentUser ? (
           <CommentForm 
@@ -538,7 +565,7 @@ const PostDetail = () => {
           </p>
         )}
         
-        {post.comments.length > 0 ? (
+        {post.comments && post.comments.length > 0 ? (
           <CommentList 
             comments={post.comments} 
             currentUser={currentUser} 
