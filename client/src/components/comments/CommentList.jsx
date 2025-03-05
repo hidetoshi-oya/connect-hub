@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
+// デフォルトのアバター画像
+const DEFAULT_AVATAR = 'https://via.placeholder.com/32?text=User';
+
 // スタイル - 将来的にはモジュールCSSを作成
 const styles = {
   commentList: {
@@ -87,9 +90,13 @@ const CommentList = ({ comments, currentUser, onDeleteComment }) => {
               <div style={styles.commentAuthor}>
                 <Link to={`/profile/${comment.author.id}`}>
                   <img
-                    src={comment.author.avatar_url || '/default-avatar.png'}
+                    src={comment.author.avatar_url || DEFAULT_AVATAR}
                     alt={comment.author.name}
                     style={styles.authorAvatar}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = DEFAULT_AVATAR;
+                    }}
                   />
                 </Link>
                 <div>
