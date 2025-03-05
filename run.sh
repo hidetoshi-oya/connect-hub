@@ -34,9 +34,15 @@ if [ ! -f "docker-compose.yml" ]; then
     exit 1
 fi
 
+# システムを完全に停止し、ボリュームも含めて削除
+echo -e "${YELLOW}システムを完全にクリーンアップしています...${NC}"
+docker-compose down -v
+
 # 一度クリーンアップを実行してから起動
 echo -e "${YELLOW}システムをクリーンアップしています...${NC}"
-./cleanup.sh
+if [ -f "./cleanup.sh" ]; then
+    ./cleanup.sh
+fi
 
 # イメージを再ビルド（キャッシュを使わない）
 echo -e "${YELLOW}Dockerイメージを再ビルドしています...${NC}"
