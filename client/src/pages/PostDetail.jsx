@@ -11,7 +11,7 @@ import CommentList from '../components/comments/CommentList';
 import LikeButton from '../components/posts/LikeButton';
 import Loading from '../components/ui/Loading';
 
-// スタイル - 将来的にはモジュールCSSを作成
+// スタイル
 const styles = {
   container: {
     padding: '2rem 0',
@@ -359,7 +359,7 @@ const PostDetail = () => {
       }
       
       // 画像の処理
-      const imgRegex = /!\[([^\\]]*)\\]\\(([^)]*)\\)/g;
+      const imgRegex = /!\[(.*?)\]\((.*?)\)/g;
       let processedLine = line;
       const images = [];
       let imgMatch;
