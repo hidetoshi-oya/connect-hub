@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './Auth.module.css';
@@ -9,10 +9,13 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    department: 'IT部' // デフォルト値
+    department: 'IT部', // デフォルト値
+    avatar_url: ''
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const fileInputRef = useRef(null);
   
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -23,6 +26,42 @@ const Register = () => {
       ...formData,
       [name]: value
     });
+  };
+  
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // 画像のサイズチェック (最大2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('画像サイズは2MB以下にしてください');
+      return;
+    }
+    
+    // 画像の形式チェック
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      setError('JPEG、PNG、またはGIF形式の画像を選択してください');
+      return;
+    }
+    
+    // プレビュー表示用にURLを作成
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+    
+    // 実際の実装ではここでファイルをアップロードサーバーに送信するか
+    // FormDataに追加します。現在はモックのためプレビューのみ表示します。
+    setFormData({
+      ...formData,
+      avatar_url: file // 実際のAPIではFormDataでファイルを送信
+    });
+  };
+  
+  const handleAvatarClick = () => {
+    fileInputRef.current.click();
   };
   
   const handleSubmit = async (e) => {
@@ -41,8 +80,16 @@ const Register = () => {
       setError('');
       setIsLoading(true);
       
+      // ここでアバター画像がある場合はアップロード処理を行う
+      // 実際の実装では、avatar_urlはアップロード後のURL/パスになります
+      const userData = { ...formData };
+      if (avatarPreview) {
+        // モックの場合は、プレビューURLをそのまま使用（実際は違う）
+        userData.avatar_url = avatarPreview;
+      }
+      
       // 仮の登録機能（実際にはAPIを呼び出す）
-      await register(formData);
+      await register(userData);
       
       // 登録成功後、ホームページにリダイレクト
       navigate('/');
@@ -51,6 +98,22 @@ const Register = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const avatarStyle = {
+    width: '100px',
+    height: '100px',
+    borderRadius: '50%',
+    backgroundColor: '#e9ecef',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 1rem auto',
+    cursor: 'pointer',
+    backgroundImage: avatarPreview ? `url(${avatarPreview})` : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    border: '2px dashed #ced4da'
   };
   
   return (
@@ -64,6 +127,23 @@ const Register = () => {
         {error && <div className={styles.error}>{error}</div>}
         
         <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.avatarUpload}>
+            <div 
+              style={avatarStyle} 
+              onClick={handleAvatarClick}
+              title="クリックしてアバター画像をアップロード"
+            >
+              {!avatarPreview && <span>画像を選択</span>}
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleAvatarChange}
+              style={{ display: 'none' }}
+              accept="image/jpeg, image/png, image/gif"
+            />
+          </div>
+          
           <div className={styles.formGroup}>
             <label className={styles.formLabel} htmlFor="name">氏名</label>
             <input
