@@ -55,11 +55,14 @@ const CommentForm = ({ postId, onAddComment }) => {
       setIsSubmitting(true);
       setError('');
       
-      // コンテンツだけを送信して、コメントの追加処理を親コンポーネントに任せる
-      await onAddComment(content);
+      // 文字列のみを渡してコメントを追加
+      // 実際のコメントオブジェクトの作成は親コンポーネントで行う
+      const result = await onAddComment(content.trim());
       
-      // フォームをリセット
-      setContent('');
+      if (result) {
+        // コメント追加成功
+        setContent(''); // フォームをリセット
+      }
     } catch (err) {
       console.error('コメントの投稿に失敗しました', err);
       setError('コメントの投稿に失敗しました。もう一度お試しください。');
