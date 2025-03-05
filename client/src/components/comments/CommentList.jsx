@@ -69,6 +69,11 @@ const styles = {
 };
 
 const CommentList = ({ comments, currentUser, onDeleteComment }) => {
+  // コメントがない場合は何も表示しない
+  if (!comments || !Array.isArray(comments) || comments.length === 0) {
+    return null;
+  }
+  
   const handleDelete = (commentId) => {
     if (window.confirm('本当にこのコメントを削除しますか？')) {
       onDeleteComment(commentId);
@@ -78,39 +83,79 @@ const CommentList = ({ comments, currentUser, onDeleteComment }) => {
   return (
     <div style={styles.commentList}>
       {comments.map((comment) => {
-        const isAuthor = currentUser && comment.author.id === currentUser.id;
+        // コメントオブジェクトの整合性をチェック
+        if (!comment || typeof comment !== 'object') {
+          console.error('Invalid comment object:', comment);
+          return null;
+        }
+        
+        // コメントIDがない場合は一意のキーを生成
+        const commentKey = comment.id || `comment-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // 作成者の情報確認
+        const authorName = comment.author && comment.author.name ? comment.author.name : '名前なし';
+        const authorDept = comment.author && comment.author.department ? comment.author.department : '';
+        const authorId = comment.author && comment.author.id ? comment.author.id : null;
+        const avatarUrl = comment.author && comment.author.avatar_url ? comment.author.avatar_url : DEFAULT_AVATAR;
+        
+        // 日付のフォーマット (無効な日付の場合はフォールバック)
+        let formattedDate = '日付なし';
+        try {
+          formattedDate = format(new Date(comment.created_at), 'yyyy年MM月dd日 HH:mm', { locale: ja });
+        } catch (e) {
+          console.error('Invalid date format:', comment.created_at);
+        }
+        
+        // ユーザー権限チェック
+        const isAuthor = currentUser && authorId === currentUser.id;
         const isAdmin = currentUser && currentUser.role === 'admin';
         const canDelete = isAuthor || isAdmin;
         
-        const formattedDate = format(new Date(comment.created_at), 'yyyy年MM月dd日 HH:mm', { locale: ja });
-        
         return (
-          <div key={comment.id} style={styles.commentItem}>
+          <div key={commentKey} style={styles.commentItem}>
             <div style={styles.commentHeader}>
               <div style={styles.commentAuthor}>
-                <Link to={`/profile/${comment.author.id}`}>
+                {authorId ? (
+                  <Link to={`/profile/${authorId}`}>
+                    <img
+                      src={avatarUrl}
+                      alt={authorName}
+                      style={styles.authorAvatar}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = DEFAULT_AVATAR;
+                      }}
+                    />
+                  </Link>
+                ) : (
                   <img
-                    src={comment.author.avatar_url || DEFAULT_AVATAR}
-                    alt={comment.author.name}
+                    src={avatarUrl}
+                    alt={authorName}
                     style={styles.authorAvatar}
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = DEFAULT_AVATAR;
                     }}
                   />
-                </Link>
+                )}
                 <div>
-                  <Link to={`/profile/${comment.author.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <span style={styles.authorName}>{comment.author.name}</span>
-                  </Link>
-                  <span style={styles.authorDepartment}>{comment.author.department}</span>
+                  {authorId ? (
+                    <Link to={`/profile/${authorId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <span style={styles.authorName}>{authorName}</span>
+                    </Link>
+                  ) : (
+                    <span style={styles.authorName}>{authorName}</span>
+                  )}
+                  <span style={styles.authorDepartment}>{authorDept}</span>
                 </div>
               </div>
               
               <div style={styles.commentDate}>{formattedDate}</div>
             </div>
             
-            <div style={styles.commentContent}>{comment.content}</div>
+            <div style={styles.commentContent}>
+              {comment.content || ''}
+            </div>
             
             {canDelete && (
               <div style={styles.commentActions}>
