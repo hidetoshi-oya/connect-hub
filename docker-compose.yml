@@ -56,6 +56,7 @@ services:
       DB_NAME: connecthub
       JWT_SECRET: your_jwt_secret_key
       NPM_CONFIG_LOGLEVEL: verbose
+      CORS_ORIGIN: http://localhost:3000
     ports:
       - "8000:8000"
     volumes:
@@ -76,14 +77,23 @@ services:
     environment:
       NODE_ENV: development
       REACT_APP_API_URL: http://localhost:8000/api
+      HOST: 0.0.0.0
+      PORT: 3000
+      WDS_SOCKET_HOST: 0.0.0.0
+      WDS_SOCKET_PORT: 3000
+      CHOKIDAR_USEPOLLING: "true"
     ports:
       - "3000:3000"
     volumes:
       - frontend_logs:/app/logs
+      - ./client:/app
+      - /app/node_modules
     depends_on:
       - backend
     networks:
       - connect-hub-network
+    stdin_open: true
+    tty: true
 
 volumes:
   mysql_data:
