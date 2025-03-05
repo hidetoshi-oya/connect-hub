@@ -11,7 +11,7 @@ echo "----------------------------------------"
 
 # Docker Composeを使用してコンテナを停止・削除
 echo -e "${YELLOW}Docker Composeでコンテナを停止・削除しています...${NC}"
-docker-compose down
+docker-compose down -v
 
 # 残存するコンテナを強制的に停止・削除
 echo -e "${YELLOW}残存するコンテナを確認・削除しています...${NC}"
@@ -20,37 +20,28 @@ if [ "$(docker ps -a -q -f name=connect-hub)" ]; then
   docker rm $(docker ps -a -q -f name=connect-hub)
 fi
 
-# 全てのプロジェクト関連ボリュームを削除
+# 特定のボリュームを削除
 echo -e "${YELLOW}関連するボリュームを削除しています...${NC}"
 
-# docker-compose.ymlで定義された名前付きボリュームを削除
-docker-compose down -v
+# 全てのConnect-Hub関連ボリュームを明示的に削除
+VOLUMES_TO_REMOVE=(
+  "connect-hub_mysql_data"
+  "connect-hub_backend_logs"
+  "connect-hub_frontend_logs"
+  "connect-hub-mysql_data"
+  "backend_logs"
+  "frontend_logs"
+  "mysql_data"
+  "backend_node_modules"
+  "frontend_node_modules"
+)
 
-# その他のプロジェクト関連ボリュームを削除
-if [ "$(docker volume ls -q -f name=connect-hub)" ]; then
-  docker volume rm $(docker volume ls -q -f name=connect-hub)
-fi
-
-if [ "$(docker volume ls -q -f name=mysql_data)" ]; then
-  docker volume rm mysql_data
-fi
-
-if [ "$(docker volume ls -q -f name=backend_logs)" ]; then
-  docker volume rm backend_logs
-fi
-
-if [ "$(docker volume ls -q -f name=frontend_logs)" ]; then
-  docker volume rm frontend_logs
-fi
-
-# バックエンドとフロントエンドの特定ボリュームを削除
-if [ "$(docker volume ls -q -f name=backend_node_modules)" ]; then
-  docker volume rm backend_node_modules
-fi
-
-if [ "$(docker volume ls -q -f name=frontend_node_modules)" ]; then
-  docker volume rm frontend_node_modules
-fi
+for volume in "${VOLUMES_TO_REMOVE[@]}"; do
+  if docker volume ls -q | grep -q "$volume"; then
+    echo "ボリューム $volume を削除しています..."
+    docker volume rm "$volume"
+  fi
+done
 
 # プルーニングでDanglingボリュームも削除
 echo -e "${YELLOW}未使用のボリュームを削除しています...${NC}"
@@ -65,6 +56,24 @@ fi
 if [ "$(docker images -q connect-hub-frontend)" ]; then
   docker rmi connect-hub-frontend
 fi
+
+if [ "$(docker images -q "*connect-hub*")" ]; then
+  docker rmi $(docker images -q "*connect-hub*")
+fi
+
+# MySQLデータの物理的なクリーンアップ
+echo -e "${YELLOW}MySQLデータの物理的なクリーンアップをしています...${NC}"
+if [ -d "/var/lib/docker/volumes/*mysql_data*" ]; then
+  sudo rm -rf /var/lib/docker/volumes/*mysql_data*
+fi
+
+# システムのディスク空き容量確認
+echo -e "${YELLOW}システムのディスク空き容量を確認しています...${NC}"
+df -h /
+
+# Dockerシステムのクリーンアップ
+echo -e "${YELLOW}Dockerシステムのクリーンアップを実行しています...${NC}"
+docker system prune -f
 
 echo -e "${GREEN}クリーンアップが完了しました！${NC}"
 echo "----------------------------------------"
