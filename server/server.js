@@ -27,12 +27,31 @@ const corsOptions = {
 
 // ミドルウェア
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// 文字化け防止用ミドルウェア - レスポンスのContent-Typeに文字セットを追加
+// JSONの文字化け対策
+app.use(express.json({ 
+  limit: '50mb',
+  type: ['application/json', 'text/plain']
+}));
+
+app.use(express.urlencoded({ 
+  extended: true,
+  limit: '50mb'
+}));
+
+// すべてのレスポンスに文字コードを設定
 app.use((req, res, next) => {
+  // デフォルトのContent-Typeを設定
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  
+  // 元のJson関数をオーバーライド
+  const originalJson = res.json;
+  res.json = function(obj) {
+    // 明示的に文字セットを設定してからJSONを送信
+    res.charset = 'utf-8';
+    return originalJson.call(this, obj);
+  };
+  
   next();
 });
 
@@ -68,6 +87,21 @@ app.use('/api/admin', adminRoutes);
  */
 app.get('/api', (req, res) => {
   res.json({ message: 'ConnectHub API is running!' });
+});
+
+// 404エラーハンドラー
+app.use((req, res, next) => {
+  res.status(404).json({
+    message: 'リクエストされたリソースが見つかりません'
+  });
+});
+
+// エラーハンドラー
+app.use((err, req, res, next) => {
+  console.error('エラーが発生しました:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'サーバー内部でエラーが発生しました'
+  });
 });
 
 // サーバー起動
