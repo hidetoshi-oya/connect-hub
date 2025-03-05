@@ -1,3 +1,8 @@
+-- 文字コード設定
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+SET SESSION collation_connection = utf8mb4_unicode_ci;
+
 -- データベース スキーマの作成
 CREATE DATABASE IF NOT EXISTS connecthub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE connecthub;
