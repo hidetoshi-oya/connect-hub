@@ -9,16 +9,18 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: false
     },
-    postId: {
+    post_id: {
       type: DataTypes.INTEGER,
+      field: 'post_id',
       allowNull: false,
       references: {
         model: 'posts',
         key: 'id'
       }
     },
-    authorId: {
+    author_id: {
       type: DataTypes.INTEGER,
+      field: 'author_id',
       allowNull: false,
       references: {
         model: 'users',
@@ -28,9 +30,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    paranoid: true, // 論理削除を有効化
-    deletedAt: 'deleted_at'
+    updatedAt: 'updated_at'
   });
 
   return Comment;
