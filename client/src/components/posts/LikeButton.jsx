@@ -50,26 +50,38 @@ const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
   const isLiked = currentUser && likes.some(like => like.user_id === currentUser.id);
   
   useEffect(() => {
-    // モックデータ用（実際の実装ではAPIからユーザー情報を取得する）
-    const mockUsers = [
-      { id: 1, name: '管理者 太郎' },
-      { id: 2, name: 'モデレータ 花子' },
-      { id: 3, name: '山田 太郎' },
-      { id: 4, name: '佐藤 健' },
-      { id: 5, name: '鈴木 一郎' },
-      { id: 6, name: '田中 美咲' },
-      { id: 7, name: '高橋 健太' },
-      { id: 8, name: '伊藤 洋子' },
-      { id: 9, name: '渡辺 和也' },
-      { id: 10, name: '小林 直樹' }
-    ];
-    
-    // いいねしたユーザーの情報を取得
-    const userEntities = likes.map(like => {
-      return mockUsers.find(user => user.id === like.user_id) || { id: like.user_id, name: 'ユーザー' };
-    });
-    
-    setLikeUsers(userEntities);
+    try {
+      // モックデータ用（実際の実装ではAPIからユーザー情報を取得する）
+      const mockUsers = [
+        { id: 1, name: '管理者 太郎' },
+        { id: 2, name: 'モデレータ 花子' },
+        { id: 3, name: '山田 太郎' },
+        { id: 4, name: '佐藤 健' },
+        { id: 5, name: '鈴木 一郎' },
+        { id: 6, name: '田中 美咲' },
+        { id: 7, name: '高橋 健太' },
+        { id: 8, name: '伊藤 洋子' },
+        { id: 9, name: '渡辺 和也' },
+        { id: 10, name: '小林 直樹' }
+      ];
+      
+      // いいねしたユーザーの情報を取得
+      if (Array.isArray(likes)) {
+        const userEntities = likes.map(like => {
+          if (!like || typeof like.user_id === 'undefined') {
+            return { id: 0, name: 'ユーザー' };
+          }
+          return mockUsers.find(user => user.id === like.user_id) || { id: like.user_id, name: 'ユーザー' };
+        });
+        
+        setLikeUsers(userEntities);
+      } else {
+        setLikeUsers([]);
+      }
+    } catch (err) {
+      console.error('いいねユーザー情報の処理エラー:', err);
+      setLikeUsers([]);
+    }
   }, [likes]);
   
   const handleClick = async (e) => {
@@ -127,25 +139,30 @@ const LikeButton = ({ postId, likes = [], currentUser, onUpdate }) => {
   
   // いいねの表示テキストを生成
   const getLikeDisplayText = () => {
-    if (likeCount === 0) {
-      return 'まだいいねがありません';
+    try {
+      if (!Array.isArray(likeUsers) || likeUsers.length === 0) {
+        return 'まだいいねがありません';
+      }
+      
+      if (likeUsers.length === 1) {
+        return `${likeUsers[0]?.name || 'ユーザー'}がいいねしました`;
+      }
+      
+      if (likeUsers.length === 2) {
+        return `${likeUsers[0]?.name || 'ユーザー'}と${likeUsers[1]?.name || 'ユーザー'}がいいねしました`;
+      }
+      
+      if (likeUsers.length <= 5) {
+        const names = likeUsers.map(user => user?.name || 'ユーザー');
+        return `${names.join('、')}がいいねしました`;
+      }
+      
+      // 5人以上の場合
+      return `${likeUsers[0]?.name || 'ユーザー'}、${likeUsers[1]?.name || 'ユーザー'}他 ${likeUsers.length - 2}名がいいねしました`;
+    } catch (err) {
+      console.error('いいね表示テキストの生成エラー:', err);
+      return 'いいね';
     }
-    
-    if (likeCount === 1) {
-      return `${likeUsers[0].name}がいいねしました`;
-    }
-    
-    if (likeCount === 2) {
-      return `${likeUsers[0].name}と${likeUsers[1].name}がいいねしました`;
-    }
-    
-    if (likeCount <= 5) {
-      const names = likeUsers.map(user => user.name);
-      return `${names.join('、')}がいいねしました`;
-    }
-    
-    // 5人以上の場合
-    return `${likeUsers[0].name}、${likeUsers[1].name}他 ${likeCount - 2}名がいいねしました`;
   };
   
   return (
