@@ -97,6 +97,16 @@
   margin-bottom: 1rem;
 }
 
+.redirectInfo {
+  color: #0c5460;
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
 .formFooter {
   text-align: center;
   margin-top: 1.5rem;
