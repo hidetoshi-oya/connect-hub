@@ -11,6 +11,9 @@ import CommentList from '../components/comments/CommentList';
 import LikeButton from '../components/posts/LikeButton';
 import Loading from '../components/ui/Loading';
 
+// デフォルトのアバター画像
+const DEFAULT_AVATAR = 'https://via.placeholder.com/40?text=User';
+
 // スタイル
 const styles = {
   container: {
@@ -465,12 +468,12 @@ const PostDetail = () => {
           <div style={styles.meta}>
             <div style={styles.author}>
               <img
-                src={post.author.avatar_url || '/default-avatar.png'}
+                src={post.author.avatar_url || DEFAULT_AVATAR}
                 alt={post.author.name}
                 style={styles.authorAvatar}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/default-avatar.png';
+                  e.target.src = DEFAULT_AVATAR;
                 }}
               />
               <span>{post.author.name} ({post.author.department})</span>
