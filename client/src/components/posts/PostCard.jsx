@@ -106,13 +106,17 @@ const styles = {
     borderTop: '1px solid #e9ecef',
     paddingTop: '0.75rem',
     marginTop: '0.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
   },
   commentCount: {
     display: 'flex',
     alignItems: 'center',
     color: '#6c757d',
     fontSize: '0.9rem',
-    marginTop: '0.5rem',
+    padding: '4px 8px',
+    borderRadius: '4px',
   },
   readMore: {
     display: 'inline-flex',
@@ -168,17 +172,21 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
 
     // Markdownの記法を取り除く（簡易的な実装）
     let plainText = text
-      .replace(/!\\[(.*?)\\]\\((.*?)\\)/g, '[画像]') // 画像を[画像]テキストに置換
-      .replace(/\\*\\*(.*?)\\*\\*/g, '$1')      // 太字を通常テキストに変換
-      .replace(/\\*(.*?)\\*/g, '$1')          // イタリックを通常テキストに変換
+      .replace(/!\[(.*?)\]\((.*?)\)/g, '[画像]') // 画像を[画像]テキストに置換
+      .replace(/\*\*(.*?)\*\*/g, '$1')      // 太字を通常テキストに変換
+      .replace(/\*(.*?)\*/g, '$1')          // イタリックを通常テキストに変換
       .replace(/__(.*?)__/g, '$1')          // 下線を通常テキストに変換
-      .replace(/^##\\s+(.*)$/gm, '$1')       // 見出し2を通常テキストに変換
-      .replace(/^###\\s+(.*)$/gm, '$1')      // 見出し3を通常テキストに変換
-      .replace(/^-\\s+(.*)$/gm, '$1');       // リストを通常テキストに変換
+      .replace(/^##\s+(.*)$/gm, '$1')       // 見出し2を通常テキストに変換
+      .replace(/^###\s+(.*)$/gm, '$1')      // 見出し3を通常テキストに変換
+      .replace(/^-\s+(.*)$/gm, '$1');       // リストを通常テキストに変換
 
     if (plainText.length <= maxLength) return plainText;
     return plainText.slice(0, maxLength) + '...';
   };
+  
+  // コメント数の取得
+  const commentCount = updatedPost.comments_count || 
+                      (updatedPost.comments ? updatedPost.comments.length : 0);
   
   return (
     <div className="post-card-container">
@@ -239,7 +247,7 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
               </div>
               
               <div style={styles.categories}>
-                {updatedPost.categories.map((category, index) => (
+                {updatedPost.categories && updatedPost.categories.map((category, index) => (
                   <span key={index} style={styles.category}>
                     {category.name}
                   </span>
@@ -252,14 +260,15 @@ const PostCard = ({ post, currentUser, onUpdate }) => {
                 <div onClick={(e) => e.preventDefault()}>
                   <LikeButton
                     postId={updatedPost.id}
-                    likes={updatedPost.likes}
+                    likes={updatedPost.likes || []}
                     currentUser={currentUser}
                     onUpdate={handleLikeUpdate}
                   />
                 </div>
+                
                 <div style={styles.commentCount}>
                   <span style={styles.icon}>💬</span>
-                  {updatedPost.comments_count || 0} 件のコメント
+                  <span>{commentCount}</span>
                 </div>
               </div>
               
