@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import PostCard from '../components/posts/PostCard';
 import Loading from '../components/ui/Loading';
@@ -31,7 +31,7 @@ const Home = () => {
     const fetchCategories = async () => {
       try {
         // APIからカテゴリを取得
-        const response = await axios.get('/api/categories');
+        const response = await api.get('/categories');
         setCategories(response.data || []);
       } catch (err) {
         console.error('カテゴリの取得に失敗:', err);
@@ -69,7 +69,7 @@ const Home = () => {
         const { category, search } = getQueryParams();
         
         // APIから投稿を取得
-        const response = await axios.get('/api/posts', {
+        const response = await api.get('/posts', {
           params: { 
             category, 
             search,
@@ -102,7 +102,7 @@ const Home = () => {
           {
             id: 1,
             title: '新しい社内報システムのβ版がリリースされました！',
-            content: '## ConnectHubのリリースについて\\n\\n長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。\\n\\n主な機能は以下の通りです：\\n\\n- 投稿機能：テキスト、画像、ファイル添付が可能な記事投稿\\n- いいね機能：投稿へのリアクション機能\\n- コメント機能：投稿へのコメント（自分のコメント削除可能）\\n- カテゴリ機能：記事のカテゴリ分類と絞り込み表示\\n- ピックアップ記事：重要な投稿を上部に固定表示\\n\\n![システムイメージ](https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)\\n\\nご不明な点があればIT部までお問い合わせください。',
+            content: '## ConnectHubのリリースについて\\\\n\\\\n長らくお待たせしました。本日より新しい社内報システム「ConnectHub」のβ版をリリースします。\\\\n\\\\n主な機能は以下の通りです：\\\\n\\\\n- 投稿機能：テキスト、画像、ファイル添付が可能な記事投稿\\\\n- いいね機能：投稿へのリアクション機能\\\\n- コメント機能：投稿へのコメント（自分のコメント削除可能）\\\\n- カテゴリ機能：記事のカテゴリ分類と絞り込み表示\\\\n- ピックアップ記事：重要な投稿を上部に固定表示\\\\n\\\\n![システムイメージ](https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80)\\\\n\\\\nご不明な点があればIT部までお問い合わせください。',
             headerImage: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
             author: {
               id: 1,
@@ -119,7 +119,7 @@ const Home = () => {
           {
             id: 2,
             title: '4月からの新プロジェクトメンバー募集',
-            content: '## 次期基幹システム開発プロジェクト\\n\\n次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。',
+            content: '## 次期基幹システム開発プロジェクト\\\\n\\\\n次期基幹システム開発プロジェクトのメンバーを募集します。興味のある方は詳細をご確認ください。',
             headerImage: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80',
             author: {
               id: 3,
