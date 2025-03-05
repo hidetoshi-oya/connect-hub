@@ -31,6 +31,13 @@
   color: #6c757d;
 }
 
+.formTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #343a40;
+  text-align: center;
+}
+
 .form {
   margin-bottom: 1rem;
 }
@@ -51,6 +58,7 @@
   font-size: 1rem;
   border: 1px solid #ced4da;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .formControl:focus {
@@ -97,8 +105,70 @@
 .formLink {
   color: #4a90e2;
   text-decoration: none;
+  margin-left: 0.5rem;
 }
 
 .formLink:hover {
   text-decoration: underline;
+}
+
+.testCredentials {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.testCredentials h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #343a40;
+  font-size: 1rem;
+}
+
+.testCredentials p {
+  margin: 0.25rem 0;
+  color: #6c757d;
+}
+
+.avatarUpload {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.avatarPreview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px dashed #ced4da;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  margin: 0 auto;
+}
+
+.avatarPreview:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+}
+
+.avatarPlaceholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: pointer;
+  border: 2px dashed #ced4da;
+  transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+  margin: 0 auto;
+}
+
+.avatarPlaceholder:hover {
+  background-color: #dee2e6;
+  border-color: #4a90e2;
 }
