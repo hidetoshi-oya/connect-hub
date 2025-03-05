@@ -21,7 +21,9 @@ module.exports = async () => {
       password: adminPassword,
       department: 'IT部',
       role: 'admin',
-      avatar_url: '/avatars/admin.jpg'
+      avatar_url: '/avatars/admin.jpg',
+      is_active: true,
+      bio: 'IT部門で社内のシステム管理を担当しています。'
     });
     
     const moderator = await User.create({
@@ -30,7 +32,9 @@ module.exports = async () => {
       password: moderatorPassword,
       department: '人事部',
       role: 'moderator',
-      avatar_url: '/avatars/moderator.jpg'
+      avatar_url: '/avatars/moderator.jpg',
+      is_active: true,
+      bio: '人事部で社内イベントの企画を担当しています。'
     });
     
     const user = await User.create({
@@ -39,7 +43,9 @@ module.exports = async () => {
       password: userPassword,
       department: '開発部',
       role: 'contributor',
-      avatar_url: '/avatars/yamada.jpg'
+      avatar_url: '/avatars/yamada.jpg',
+      is_active: true,
+      bio: '開発部でフロントエンド開発を担当しています。'
     });
     
     // カテゴリの作成
@@ -72,8 +78,8 @@ module.exports = async () => {
 - ピックアップ記事：重要な投稿を上部に固定表示
 
 ご不明な点があればIT部までお問い合わせください。`,
-      isPinned: true,
-      authorId: admin.id
+      is_pinned: true,
+      author_id: admin.id
     });
     
     const post2 = await Post.create({
@@ -93,8 +99,8 @@ module.exports = async () => {
 【応募方法】
 開発部の山田までメールにてご連絡ください。
 応募締切：3月20日`,
-      isPinned: false,
-      authorId: user.id
+      is_pinned: false,
+      author_id: user.id
     });
     
     const post3 = await Post.create({
@@ -119,8 +125,8 @@ module.exports = async () => {
 【申し込み方法】
 人事部の花子までメールにてご連絡ください。
 申し込み締切：7月5日`,
-      isPinned: true,
-      authorId: moderator.id
+      is_pinned: true,
+      author_id: moderator.id
     });
     
     // カテゴリと投稿の関連付け
@@ -142,34 +148,34 @@ module.exports = async () => {
     // コメントの作成
     await Comment.create({
       content: '待っていました！早速使ってみます。',
-      postId: post1.id,
-      authorId: moderator.id
+      post_id: post1.id,
+      author_id: moderator.id
     });
     
     // いいねの作成
     await Like.create({
-      userId: moderator.id,
-      postId: post1.id
+      user_id: moderator.id,
+      post_id: post1.id
     });
     
     await Like.create({
-      userId: user.id,
-      postId: post1.id
+      user_id: user.id,
+      post_id: post1.id
     });
     
     await Like.create({
-      userId: admin.id,
-      postId: post2.id
+      user_id: admin.id,
+      post_id: post2.id
     });
     
     await Like.create({
-      userId: admin.id,
-      postId: post3.id
+      user_id: admin.id,
+      post_id: post3.id
     });
     
     await Like.create({
-      userId: user.id,
-      postId: post3.id
+      user_id: user.id,
+      post_id: post3.id
     });
     
     console.log('初期データの作成が完了しました！');
