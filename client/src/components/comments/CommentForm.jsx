@@ -55,26 +55,8 @@ const CommentForm = ({ postId, onAddComment }) => {
       setIsSubmitting(true);
       setError('');
       
-      // 実際はAPIを呼び出してコメントを投稿する
-      // const response = await axios.post(`/api/posts/${postId}/comments`, {
-      //   content,
-      // });
-      
-      // モックのレスポンス
-      const newComment = {
-        id: Date.now(), // 一意のIDを生成
-        content,
-        author: {
-          id: currentUser.id,
-          name: currentUser.name,
-          department: currentUser.department,
-          avatar_url: currentUser.avatar_url,
-        },
-        created_at: new Date(),
-      };
-      
-      // 親コンポーネントにコメントを渡す
-      onAddComment(newComment);
+      // コンテンツだけを送信して、コメントの追加処理を親コンポーネントに任せる
+      await onAddComment(content);
       
       // フォームをリセット
       setContent('');
