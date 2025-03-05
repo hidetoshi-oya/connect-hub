@@ -1,36 +1,28 @@
 module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define("likes", {
-    id: {
+    post_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+      field: 'post_id',
       references: {
-        model: 'users',
+        model: 'posts',
         key: 'id'
       }
     },
-    postId: {
+    user_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      primaryKey: true,
+      field: 'user_id',
       references: {
-        model: 'posts',
+        model: 'users',
         key: 'id'
       }
     }
   }, {
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    indexes: [
-      {
-        unique: true,
-        fields: ['userId', 'postId']
-      }
-    ]
+    updatedAt: false,
+    tableName: 'likes'
   });
 
   return Like;
