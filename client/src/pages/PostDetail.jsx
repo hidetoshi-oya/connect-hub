@@ -84,6 +84,23 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     marginBottom: '2rem',
+    alignItems: 'center',
+  },
+  engagementSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+  },
+  commentCount: {
+    display: 'flex',
+    alignItems: 'center',
+    color: '#6c757d',
+    padding: '4px 8px',
+    borderRadius: '4px',
+  },
+  commentIcon: {
+    marginRight: '0.25rem',
+    fontSize: '1rem',
   },
   postActions: {
     display: 'flex',
@@ -471,6 +488,7 @@ const PostDetail = () => {
   const isAuthor = currentUser && post.author.id === currentUser.id;
   const isAdmin = currentUser && currentUser.role === 'admin';
   const canEdit = isAuthor || isAdmin;
+  const commentCount = post.comments ? post.comments.length : 0;
   
   return (
     <div className="container" style={styles.container}>
@@ -527,13 +545,20 @@ const PostDetail = () => {
       </div>
       
       <div style={styles.actions}>
-        <div onClick={(e) => e.preventDefault()}>
-          <LikeButton
-            postId={post.id}
-            likes={post.likes || []}
-            currentUser={currentUser}
-            onUpdate={handleLikeUpdate}
-          />
+        <div style={styles.engagementSection}>
+          <div onClick={(e) => e.preventDefault()}>
+            <LikeButton
+              postId={post.id}
+              likes={post.likes || []}
+              currentUser={currentUser}
+              onUpdate={handleLikeUpdate}
+            />
+          </div>
+          
+          <div style={styles.commentCount}>
+            <span style={styles.commentIcon}>💬</span>
+            <span>{commentCount}</span>
+          </div>
         </div>
         
         {canEdit && (
@@ -552,7 +577,7 @@ const PostDetail = () => {
       </div>
       
       <div style={styles.commentsContainer}>
-        <h2 style={styles.commentsHeader}>コメント ({post.comments ? post.comments.length : 0})</h2>
+        <h2 style={styles.commentsHeader}>コメント ({commentCount})</h2>
         
         {currentUser ? (
           <CommentForm 
