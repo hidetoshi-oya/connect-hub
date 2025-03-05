@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
 // デフォルトのアバター画像
-const DEFAULT_AVATAR = 'https://via.placeholder.com/32?text=User';
+const DEFAULT_AVATAR = '/default-avatar.png';
 
 // スタイル - 将来的にはモジュールCSSを作成
 const styles = {
