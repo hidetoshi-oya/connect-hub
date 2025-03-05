@@ -12,7 +12,18 @@ const sequelize = new Sequelize(
     dialect: dbConfig.dialect,
     operatorsAliases: 0,
     pool: dbConfig.pool,
-    logging: dbConfig.logging
+    logging: dbConfig.logging,
+    retry: {
+      max: 10,
+      match: [
+        /ETIMEDOUT/,
+        /ECONNREFUSED/,
+        /PROTOCOL_CONNECTION_LOST/,
+        /ECONNRESET/
+      ],
+      backoffBase: 1000,
+      backoffExponent: 1.5,
+    }
   }
 );
 
