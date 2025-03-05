@@ -11,14 +11,18 @@ services:
       MYSQL_DATABASE: connecthub
       MYSQL_USER: connecthub_user
       MYSQL_PASSWORD: connecthub_password
+      MYSQL_INNODB_LOG_FILE_SIZE: 4M  # ログファイルサイズを小さくする
+      MYSQL_INNODB_LOG_BUFFER_SIZE: 2M  # バッファサイズも小さくする
+      MYSQL_TMP_DIR: /tmp  # 一時ディレクトリを変更
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/init:/docker-entrypoint-initdb.d
+      - /tmp:/tmp
     networks:
       - connect-hub-network
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --host-cache-size=0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --host-cache-size=0 --innodb-log-file-size=4M --innodb-log-buffer-size=2M --tmpdir=/tmp
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "connecthub_user", "--password=connecthub_password"]
       interval: 10s
@@ -73,8 +77,11 @@ services:
 
 volumes:
   mysql_data:
+    driver: local
   backend_logs:
+    driver: local
   frontend_logs:
+    driver: local
 
 networks:
   connect-hub-network:
